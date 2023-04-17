@@ -1,0 +1,124 @@
+#root {
+  height: calc(100vh);
+  width: calc(100vw);
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 
+    ui-sans-serif, 
+    system-ui, 
+    -system-ui, 
+    -apple-system,
+    BlinkMacSystemFont,
+    Roboto, Helvetica, Arial, 
+    sans-serif, 
+    "Apple Color Emoji" !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.02rem;
+  overflow: auto;
+  cursor: default;
+  user-select: none;
+  overscroll-behavior: contain;
+  touch-action: none !important;
+}
+
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  margin: 0px;
+  margin-top: 0px;
+  padding: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  color: black;
+  background-color: rgb(0, 0, 0);
+}
+
+.box .row {}
+
+.box .row.header {
+  flex: 0 1 auto;
+  /* The above is shorthand for:
+  flex-grow: 0,
+  flex-shrink: 1,
+  flex-basis: auto
+  */
+  margin: 0;
+  /* padding-top: 10px;
+  padding-bottom: 10px; */
+  padding-left: 0px;
+  padding-right: 0px;
+  font-size: 1rem;
+  font-weight: 400; 
+  color: #d2d2d2;
+  min-height: 50px;
+  max-height: 50px;
+}
+
+.box .row.content {
+  flex: 1 1 auto;
+  background-color: white;
+  padding: 0;
+  margin: 0;
+}
+
+.box .row.footer {
+  flex: 0 1 0px; /* total margin and padding of ".box .row.header" */
+  padding: 0;
+  font-weight: 600;
+  height: 0px;
+}
+
+/* reactstrap */
+
+.navbar-brand {
+  font-size: 1rem !important;
+  text-decoration: none !important;
+}
+
+.nav {
+  font-size: 0.9rem !important;
+}
+
+/* higlass */
+
+.higlass {
+  padding-right: 0px !important;
+  padding-left: 0px !important;
+}
+
+/* UX */
+
+.fa-toggle {
+  color: white;
+  font-size: 1.25rem;
+  position: relative;
+  top: 1px;
+  cursor: pointer;
+}
+
+.fa-toggle-data {
+  transform: rotate(180deg);
+}
+
+.fa-toggle-test {
+  transform: none;
+}
+
+.fa-toggle-disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.mode-disabled {
+  font-weight: 300;
+}
+
+.mode-enabled {
+  font-weight: 700;
+}

@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { 
   HiGlassComponent, 
+  ChromosomeInfo,
   version as HiGlassVersion,
 } from "higlass";
 import "higlass/dist/hglib.css";
@@ -29,9 +30,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      title: "fiber-seq viewer",
+      title: "test pileup viewer",
       mode: "test",
-      modeToggleEnabled: false,
+      modeToggleEnabled: true,
       hgViewKey: 0,
       hgViewconf: Constants.testHiglassPileupViewconf,
       hgOptions: { // http://docs.higlass.io/javascript_api.html#overview
@@ -46,12 +47,23 @@ class App extends Component {
         viewPaddingLeft: 0,
         viewPaddingRight: 0,
       },
+      chromInfo: {},
     };
     this.hgViewRef = React.createRef();
   }
 
   componentDidMount() {
     // this.queryHiglassIoForDefaultViewconf();
+    console.log(`Constants.hg38ChromsizesURL ${Constants.hg38ChromsizesURL}`);
+    const chromInfo = ChromosomeInfo(
+      Constants.hg38ChromsizesURL,
+      (newChromInfo) => { 
+        console.log('chromInfo:', newChromInfo); 
+        this.setState({
+          chromInfo: newChromInfo,
+        });
+      }
+    );
   }
 
   componentWillUnmount() {}
@@ -91,10 +103,27 @@ class App extends Component {
   toggleMode = (e) => {
     if (!this.state.modeToggleEnabled) return;
     const newMode = (this.state.mode === "test") ? "data" : "test";
+    const newHgViewconf = (this.state.mode === "test") ? Constants.gimelbrantHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
     // console.log(`toggleMode | ${this.state.mode} -> ${newMode}`);
     this.setState({
       mode: newMode,
+      hgViewconf: newHgViewconf,
+    }, () => {
+      if (this.state.mode === "data") {
+        // this.zoomGimelbrantToChr11()
+      }
     });
+  }
+
+  zoomGimelbrantToChr11 = () => {
+    this.hgViewRef.zoomTo(
+      this.state.hgViewconf.views[0].uid,
+      this.state.chromInfo.chrToAbs(['chr11', 0]),
+      this.state.chromInfo.chrToAbs(['chr11', 135086800]),
+      this.state.chromInfo.chrToAbs(['chr11', 0]),
+      this.state.chromInfo.chrToAbs(['chr11', 135086800]),
+      2500,
+    );
   }
 
   render() {
@@ -110,7 +139,7 @@ class App extends Component {
               &nbsp;&nbsp;
               <FaToggleOn 
                 onClick={(e) => this.toggleMode(e)} 
-                className={(this.state.mode === "data") ? "fa-toggle fa-toggle-data fa-toggle-disabled" : "fa-toggle fa-toggle-test fa-toggle-disabled"} />
+                className={(this.state.mode === "data") ? "fa-toggle fa-toggle-data" : "fa-toggle fa-toggle-test"} />
               &nbsp;&nbsp;
               <div className={(this.state.mode === "test") ? "mode-enabled" : "mode-disabled"}>
                 test (higlass-pileup)
@@ -123,7 +152,7 @@ class App extends Component {
             ? 
             <HiGlassComponent 
               key={this.state.hgViewKey}
-              ref={this.hgViewRef}
+              ref={(component) => this.hgViewRef = component}
               options={this.state.hgOptions}
               viewConfig={this.state.hgViewconf}
             /> 

@@ -1,64 +1,63 @@
 export const testHiglassPileupViewconf = {
-    "editable": true,
-    "trackSourceServers": [
-      "http://higlass.io/api/v1"
-    ],
-    "exportViewUrl": "/api/v1/viewconfs",
-    "views": [
-      {
-        "uid" : "CLH4ybW8ToynSKBby7aB4g",
-        "initialXDomain": [
-          40000,
-          60000
-        ],
-        "tracks": {
-          "top": [
-            {
-              "type": "pileup",
-              "height": 320,
+  "editable": true,
+  "trackSourceServers": [
+    "http://higlass.io/api/v1"
+  ],
+  "exportViewUrl": "/api/v1/viewconfs",
+  "views": [
+    {
+      "uid" : "CLH4ybW8ToynSKBby7aB4g",
+      "initialXDomain": [
+        40000,
+        60000
+      ],
+      "tracks": {
+        "top": [
+          {
+            "type": "pileup",
+            "height": 320,
+            "options": {
+              "axisPositionHorizontal": "right",
+              "axisLabelFormatting": "normal",
+              "showCoverage": false,
+              "colorScale": [
+                // A T G C N Other
+                "#2c7bb6",
+                "#92c5de",
+                "#ffffbf",
+                "#fdae61",
+                "#808080",
+                "#DCDCDC"
+              ]
+            },
+            "uid": "FylkvVBTSumoJ959HT4-5A",
+            "data": {
+              "type": "bam",
+              "url": "https://pkerp.s3.amazonaws.com/public/bamfile_test/SRR1770413.sorted.bam",
+              "chromSizesUrl": "https://pkerp.s3.amazonaws.com/public/bamfile_test/GCF_000005845.2_ASM584v2_genomic.chrom.sizes",
               "options": {
-                "axisPositionHorizontal": "right",
-                "axisLabelFormatting": "normal",
-                "showCoverage": false,
-                "colorScale": [
-                  // A T G C N Other
-                  "#2c7bb6",
-                  "#92c5de",
-                  "#ffffbf",
-                  "#fdae61",
-                  "#808080",
-                  "#DCDCDC"
-                ]
-              },
-              "uid": "FylkvVBTSumoJ959HT4-5A",
-              "data": {
-                "type": "bam",
-                "url": "https://pkerp.s3.amazonaws.com/public/bamfile_test/SRR1770413.sorted.bam",
-                "chromSizesUrl": "https://pkerp.s3.amazonaws.com/public/bamfile_test/GCF_000005845.2_ASM584v2_genomic.chrom.sizes",
-                "options": {
-                    "maxTileWidth": 30000
-                }
-              },
-              "width": 470
-            }
-          ]
-        },
-        "layout": {
-          "w": 12,
-          "h": 12,
-          "x": 0,
-          "y": 0,
-          "i" : "CLH4ybW8ToynSKBby7aB4g",
-          "moved" : false,
-          "static" : false
-        }
+                  "maxTileWidth": 30000
+              }
+            },
+            "width": 470
+          }
+        ]
+      },
+      "layout": {
+        "w": 12,
+        "h": 12,
+        "x": 0,
+        "y": 0,
+        "i" : "CLH4ybW8ToynSKBby7aB4g",
+        "moved" : false,
+        "static" : false
       }
-    ]
-  }
+    }
+  ]
+}
 
-// "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes"; 
-// "https://epilogos.altius.org:3001/assets/chromsizes/hg38.chrom.sizes.fixedBin";
-export const hg38ChromsizesURL = "https://epilogos.altius.org:3001/assets/chromsizes/hg38.chrom.sizes.fixedBin"; 
+export const gimelbrantTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam";
+export const hg38ChromsizesURL = "https://areynolds-us-west-2.s3.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes";
 
 export const gimelbrantHiglassPileupViewconf = {
   "editable": true,
@@ -157,11 +156,11 @@ export const gimelbrantHiglassPileupViewconf = {
             "uid": "FylkvVBTSumoJ959HT4-5A",
             "data": {
               "type": "bam",
-              "url": "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam",
+              "url": gimelbrantTestBAMURL,
               "chromSizesUrl": hg38ChromsizesURL,
-              "options": {
-                  "maxTileWidth": 100000
-              }
+              // "options": {
+              //     "maxTileWidth": 100000
+              // }
             },
           },
         ]

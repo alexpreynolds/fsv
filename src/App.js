@@ -30,7 +30,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      title: "test pileup viewer",
+      title: "fiber-seq viewer",
       mode: "test",
       modeToggleEnabled: true,
       hgViewKey: 0,
@@ -58,7 +58,7 @@ class App extends Component {
     const chromInfo = ChromosomeInfo(
       Constants.hg38ChromsizesURL,
       (newChromInfo) => { 
-        console.log('chromInfo:', newChromInfo); 
+        // console.log('chromInfo:', newChromInfo); 
         this.setState({
           chromInfo: newChromInfo,
         });
@@ -110,12 +110,12 @@ class App extends Component {
       hgViewconf: newHgViewconf,
     }, () => {
       if (this.state.mode === "data") {
-        // this.zoomGimelbrantToChr11()
+        // this.zoomGimelbrantTestBAMToChr11()
       }
     });
   }
 
-  zoomGimelbrantToChr11 = () => {
+  zoomGimelbrantTestBAMToChr11 = () => {
     this.hgViewRef.zoomTo(
       this.state.hgViewconf.views[0].uid,
       this.state.chromInfo.chrToAbs(['chr11', 0]),

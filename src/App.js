@@ -12,7 +12,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { 
   HiGlassComponent, 
   ChromosomeInfo,
-  version as HiGlassVersion,
+  // version as HiGlassVersion,
 } from "higlass";
 import "higlass/dist/hglib.css";
 
@@ -31,10 +31,10 @@ class App extends Component {
     super(props);
     this.state = {
       title: "fiber-seq viewer",
-      mode: "test",
+      mode: "data",
       modeToggleEnabled: true,
       hgViewKey: 0,
-      hgViewconf: Constants.testHiglassPileupViewconf,
+      hgViewconf: Constants.gimelbrantHiglassPileupViewconf, // Constants.testHiglassPileupViewconf,
       hgOptions: { // http://docs.higlass.io/javascript_api.html#overview
         bounded: true,
         sizeMode: "bounded",
@@ -47,23 +47,26 @@ class App extends Component {
         viewPaddingLeft: 0,
         viewPaddingRight: 0,
       },
-      chromInfo: {},
+      chromInfo: null,
     };
     this.hgViewRef = React.createRef();
+    
+    const csu = (this.state.mode === "data") ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL;
+    ChromosomeInfo(csu)
+      .then((newChromInfo) => {
+        this.state.chromInfo = newChromInfo;
+      });
   }
 
   componentDidMount() {
     // this.queryHiglassIoForDefaultViewconf();
-    console.log(`Constants.hg38ChromsizesURL ${Constants.hg38ChromsizesURL}`);
-    const chromInfo = ChromosomeInfo(
-      Constants.hg38ChromsizesURL,
-      (newChromInfo) => { 
-        // console.log('chromInfo:', newChromInfo); 
-        this.setState({
-          chromInfo: newChromInfo,
-        });
+    setTimeout(() => {
+      if (this.state.mode === "data") {
+        setTimeout(() => {
+          this.zoomGimelbrantTestBAMToChr11();
+        }, 1000); 
       }
-    );
+    }, 100);
   }
 
   componentWillUnmount() {}
@@ -109,21 +112,31 @@ class App extends Component {
       mode: newMode,
       hgViewconf: newHgViewconf,
     }, () => {
+      // this.updateChromosomeInfoObject((this.state.mode === "data") ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
       if (this.state.mode === "data") {
-        // this.zoomGimelbrantTestBAMToChr11()
+        this.zoomGimelbrantTestBAMToChr11();
+        this.hgViewRef.zoomTo(
+          this.state.hgViewconf.views[0].uid,
+          this.state.chromInfo.chrToAbs(['chr11', 99950]),
+          this.state.chromInfo.chrToAbs(['chr11', 100001]),
+          this.state.chromInfo.chrToAbs(['chr11', 99950]),
+          this.state.chromInfo.chrToAbs(['chr11', 100001]),
+          0,
+        );
       }
     });
   }
 
   zoomGimelbrantTestBAMToChr11 = () => {
+    if (!this.hgViewRef || !this.state.chromInfo) return;
     this.hgViewRef.zoomTo(
       this.state.hgViewconf.views[0].uid,
-      this.state.chromInfo.chrToAbs(['chr11', 0]),
-      this.state.chromInfo.chrToAbs(['chr11', 135086800]),
-      this.state.chromInfo.chrToAbs(['chr11', 0]),
-      this.state.chromInfo.chrToAbs(['chr11', 135086800]),
-      2500,
-    );
+      this.state.chromInfo.chrToAbs(['chr11', 99900]),
+      this.state.chromInfo.chrToAbs(['chr11', 100001]),
+      this.state.chromInfo.chrToAbs(['chr11', 99900]),
+      this.state.chromInfo.chrToAbs(['chr11', 100001]),
+      0,
+    );    
   }
 
   render() {

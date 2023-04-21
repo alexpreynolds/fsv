@@ -1,3 +1,5 @@
+export const testHiglassChromsizesURL = "https://pkerp.s3.amazonaws.com/public/bamfile_test/GCF_000005845.2_ASM584v2_genomic.chrom.sizes";
+
 export const testHiglassPileupViewconf = {
   "editable": true,
   "trackSourceServers": [
@@ -34,9 +36,9 @@ export const testHiglassPileupViewconf = {
             "data": {
               "type": "bam",
               "url": "https://pkerp.s3.amazonaws.com/public/bamfile_test/SRR1770413.sorted.bam",
-              "chromSizesUrl": "https://pkerp.s3.amazonaws.com/public/bamfile_test/GCF_000005845.2_ASM584v2_genomic.chrom.sizes",
+              "chromSizesUrl": testHiglassChromsizesURL,
               "options": {
-                  "maxTileWidth": 30000
+                  "maxTileWidth": 300000
               }
             },
             "width": 470
@@ -56,7 +58,7 @@ export const testHiglassPileupViewconf = {
   ]
 }
 
-export const gimelbrantTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam";
+export const gimelbrantTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.subset.bam";
 export const hg38ChromsizesURL = "https://areynolds-us-west-2.s3.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes";
 
 export const gimelbrantHiglassPileupViewconf = {
@@ -69,7 +71,7 @@ export const gimelbrantHiglassPileupViewconf = {
   "exportViewUrl": "/api/v1/viewconfs",
   "views": [
     {
-      "uid" : "CLH4ybW8ToynSKBby7aB4g",
+      "uid" : "abcd",
       "genomePositionSearchBoxVisible" : true,
       "genomePositionSearchBox" : {
         "autocompleteServer" : "http://higlass.io/api/v1",
@@ -99,7 +101,7 @@ export const gimelbrantHiglassPileupViewconf = {
               "name" : "chromosomes_hg38",
               "backgroundColor" : "white"
             },
-            "height" : 25,
+            "height" : 30,
             "position" : "top"
           },
           {
@@ -132,13 +134,13 @@ export const gimelbrantHiglassPileupViewconf = {
               "name" : "annotations_GENCODE_v28",
               "backgroundColor" : "white"
             },
-            "height" : 120,
+            "height" : 80,
             "header" : "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
             "position" : "top"
           },
           {
             "type": "pileup",
-            "height": 320,
+            "height": 640,
             "options": {
               "axisPositionHorizontal": "right",
               "axisLabelFormatting": "normal",
@@ -158,9 +160,9 @@ export const gimelbrantHiglassPileupViewconf = {
               "type": "bam",
               "url": gimelbrantTestBAMURL,
               "chromSizesUrl": hg38ChromsizesURL,
-              // "options": {
-              //     "maxTileWidth": 100000
-              // }
+              "options": {
+                  "maxTileWidth": 50000
+              },
             },
           },
         ]
@@ -170,9 +172,6 @@ export const gimelbrantHiglassPileupViewconf = {
         "h": 12,
         "x": 0,
         "y": 0,
-        "i" : "CLH4ybW8ToynSKBby7aB4g",
-        "moved" : false,
-        "static" : false
       }
     }
   ]

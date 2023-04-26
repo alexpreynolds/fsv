@@ -150,9 +150,9 @@ export const gimelbrantHiglassPileupViewconf = {
               "axisPositionHorizontal": "right",
               "axisLabelFormatting": "normal",
               "outlineReadOnHover": "yes",
-              "groupBy": "strand",
-              "minusStrandColor": "#ffd1d4",
-              "plusStrandColor": "#cfd0ff",
+              // "groupBy": "strand",
+              // "minusStrandColor": "#ebebeb",
+              // "plusStrandColor": "#ebebeb",
               "showCoverage": true,
               "colorScale": [
                 // A T G C N Other

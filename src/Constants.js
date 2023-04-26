@@ -58,7 +58,8 @@ export const testHiglassPileupViewconf = {
   ]
 }
 
-export const gimelbrantTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.subset.bam";
+export const gimelbrantTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam";
+export const gimelbrantTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam.bai";
 export const hg38ChromsizesURL = "https://areynolds-us-west-2.s3.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes";
 
 export const gimelbrantHiglassPileupViewconf = {
@@ -72,6 +73,10 @@ export const gimelbrantHiglassPileupViewconf = {
   "views": [
     {
       "uid" : "abcd",
+      "initialXDomain": [
+        40000,
+        60000
+      ],
       "genomePositionSearchBoxVisible" : true,
       "genomePositionSearchBox" : {
         "autocompleteServer" : "http://higlass.io/api/v1",
@@ -158,10 +163,11 @@ export const gimelbrantHiglassPileupViewconf = {
             "uid": "FylkvVBTSumoJ959HT4-5A",
             "data": {
               "type": "bam",
-              "url": gimelbrantTestBAMURL,
+              "bamUrl": gimelbrantTestBAMURL,
+              "baiUrl": gimelbrantTestBAIURL,
               "chromSizesUrl": hg38ChromsizesURL,
               "options": {
-                  "maxTileWidth": 50000
+                  "maxTileWidth": 30000
               },
             },
           },

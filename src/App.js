@@ -63,8 +63,8 @@ class App extends Component {
     setTimeout(() => {
       if (this.state.mode === "data") {
         setTimeout(() => {
-          this.zoomGimelbrantTestBAMToChr11();
-        }, 1000); 
+          this.zoomGimelbrantTestBAMToChr11HBG2();
+        }, 0); 
       }
     }, 100);
   }
@@ -114,27 +114,19 @@ class App extends Component {
     }, () => {
       // this.updateChromosomeInfoObject((this.state.mode === "data") ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
       if (this.state.mode === "data") {
-        this.zoomGimelbrantTestBAMToChr11();
-        this.hgViewRef.zoomTo(
-          this.state.hgViewconf.views[0].uid,
-          this.state.chromInfo.chrToAbs(['chr11', 99950]),
-          this.state.chromInfo.chrToAbs(['chr11', 100001]),
-          this.state.chromInfo.chrToAbs(['chr11', 99950]),
-          this.state.chromInfo.chrToAbs(['chr11', 100001]),
-          0,
-        );
+        this.zoomGimelbrantTestBAMToChr11HBG2();
       }
     });
   }
 
-  zoomGimelbrantTestBAMToChr11 = () => {
+  zoomGimelbrantTestBAMToChr11HBG2 = () => {
     if (!this.hgViewRef || !this.state.chromInfo) return;
     this.hgViewRef.zoomTo(
       this.state.hgViewconf.views[0].uid,
-      this.state.chromInfo.chrToAbs(['chr11', 99900]),
-      this.state.chromInfo.chrToAbs(['chr11', 100001]),
-      this.state.chromInfo.chrToAbs(['chr11', 99900]),
-      this.state.chromInfo.chrToAbs(['chr11', 100001]),
+      this.state.chromInfo.chrToAbs(['chr11', 5250000]),
+      this.state.chromInfo.chrToAbs(['chr11', 5260000]),
+      this.state.chromInfo.chrToAbs(['chr11', 5250000]),
+      this.state.chromInfo.chrToAbs(['chr11', 5260000]),
       0,
     );    
   }

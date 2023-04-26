@@ -74,8 +74,8 @@ export const gimelbrantHiglassPileupViewconf = {
     {
       "uid" : "abcd",
       "initialXDomain": [
-        40000,
-        60000
+        1813933893,
+        1813936188
       ],
       "genomePositionSearchBoxVisible" : true,
       "genomePositionSearchBox" : {
@@ -149,7 +149,11 @@ export const gimelbrantHiglassPileupViewconf = {
             "options": {
               "axisPositionHorizontal": "right",
               "axisLabelFormatting": "normal",
-              "showCoverage": false,
+              "outlineReadOnHover": "yes",
+              "groupBy": "strand",
+              "minusStrandColor": "#ffd1d4",
+              "plusStrandColor": "#cfd0ff",
+              "showCoverage": true,
               "colorScale": [
                 // A T G C N Other
                 "#2c7bb6",

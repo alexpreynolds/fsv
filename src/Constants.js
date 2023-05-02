@@ -153,7 +153,7 @@ export const gimelbrantHiglassPileupViewconf = {
               // "groupBy": "strand",
               // "minusStrandColor": "#ebebeb",
               // "plusStrandColor": "#ebebeb",
-              "showCoverage": true,
+              "showCoverage": false,
               "colorScale": [
                 // A T G C N Other
                 "#2c7bb6",
@@ -162,7 +162,8 @@ export const gimelbrantHiglassPileupViewconf = {
                 "#fdae61",
                 "#808080",
                 "#DCDCDC"
-              ]
+              ],
+              "showLoadingText": false,
             },
             "uid": "FylkvVBTSumoJ959HT4-5A",
             "data": {
@@ -171,7 +172,7 @@ export const gimelbrantHiglassPileupViewconf = {
               "baiUrl": gimelbrantTestBAIURL,
               "chromSizesUrl": hg38ChromsizesURL,
               "options": {
-                  "maxTileWidth": 30000
+                  "maxTileWidth": 35000
               },
             },
           },

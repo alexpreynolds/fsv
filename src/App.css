@@ -26,6 +26,37 @@ body {
   touch-action: none !important;
 }
 
+.content-parent {
+  padding: 0;
+  margin: 0;
+}
+
+.cover {
+  position: absolute;
+  z-index: 1;
+  width: calc(100vw);
+  height: calc(100vh);
+}
+
+.cover-visible {
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  opacity: 1;
+  /* visibility: visible; */
+  transition: opacity 250ms linear 750ms;
+  display: flex;
+  justify-content: center; /* Align horizontal */
+  align-items: center; /* Align vertical */
+}
+
+.cover-not-visible {
+  background-color: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  opacity: 0;
+  /* visibility: hidden; */
+  transition: opacity 250ms linear 750ms;
+}
+
 .box {
   display: flex;
   flex-flow: column;
@@ -56,8 +87,8 @@ body {
   font-size: 1rem;
   font-weight: 400; 
   color: #d2d2d2;
-  min-height: 50px;
-  max-height: 50px;
+  min-height: 30px;
+  max-height: 30px;
 }
 
 .box .row.content {
@@ -121,4 +152,75 @@ body {
 
 .mode-enabled {
   font-weight: 700;
+}
+
+.loading {
+  margin: 20px;
+  font-size: 3rem;
+  text-shadow:
+		-1px -1px 0 #999,
+		1px -1px 0 #999,
+		-1px 1px 0 #999,
+		1px 1px 0 #999;
+}
+
+.loading:after {
+  display: inline-block;
+  animation: dotty steps(1,end) 1250ms infinite;
+  content: '';
+}
+
+@keyframes dotty {
+  0%   { content: '\0000a0\0000a0\0000a0'; }
+  25%  { content: '.\0000a0\0000a0'; }
+  50%  { content: '..\0000a0'; }
+  75%  { content: '...'; }
+  100% { content: '\0000a0\0000a0\0000a0'; }
+}
+
+.header-content {
+  display: inline-block;
+  padding-top: 1px;
+  margin-left: 0px;
+  padding-left: 8px;
+}
+
+.header-hamburger {
+  display: inline-block;
+}
+
+.header-title {
+  display: inline-block;
+  position: relative;
+  top: 2px;
+  padding-left: 8px;
+}
+
+.drawer {
+  padding: 7px;
+  padding-left: 12px;
+  padding-right: 12px;
+  color: black;
+  letter-spacing: 0.025rem;
+}
+
+.drawer-hamburger {
+  position: absolute;
+  z-index: 1;
+  right: 11px;
+  top: 11px;
+}
+
+.drawer-title {
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+
+.drawer-subtitle {
+  font-size: 0.8rem;
+  font-weight: 300;
+  margin: 0;
+  padding: 0;
 }

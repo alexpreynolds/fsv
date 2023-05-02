@@ -2,25 +2,22 @@ import React, { Component } from "react";
 
 import axios from "axios";
 
-import {
-  Navbar,
-  NavbarBrand,
-  Nav,
-} from "reactstrap";
-import 'bootstrap/dist/css/bootstrap.min.css';
-
 import { 
   HiGlassComponent, 
   ChromosomeInfo,
   // version as HiGlassVersion,
 } from "higlass";
 import "higlass/dist/hglib.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 // higlass-pileup
 // ref. https://github.com/higlass/higlass-pileup
 import "higlass-pileup/dist/higlass-pileup.js";
 
-import { FaToggleOn } from 'react-icons/fa';
+import { FaBars, FaTimes, FaToggleOn } from 'react-icons/fa';
+
+import Drawer from 'react-modern-drawer';
+import 'react-modern-drawer/dist/index.css'
 
 import * as Constants from "./Constants.js";
 
@@ -48,6 +45,10 @@ class App extends Component {
         viewPaddingRight: 0,
       },
       chromInfo: null,
+      coverEnabled: true,
+      coverVisible: true,
+      fetchingTilesetInfo: true,
+      hamburgerClosedState: true,
     };
     this.hgViewRef = React.createRef();
     
@@ -56,6 +57,9 @@ class App extends Component {
       .then((newChromInfo) => {
         this.state.chromInfo = newChromInfo;
       });
+
+    this.pileupTrackStatusMonitor = new BroadcastChannel("pileup-track-status");
+    this.pileupTrackStatusMonitor.onmessage = (event) => this.handlePileupTrackStatusChange(event.data);
   }
 
   componentDidMount() {
@@ -69,7 +73,49 @@ class App extends Component {
     }, 100);
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    this.pileupTrackStatusMonitor.close();
+  }
+
+  handlePileupTrackStatusChange = (data) => {
+    console.log(`handlePileupTrackStatusChange | ${JSON.stringify(data)}`);
+    let newCoverVisible = true;
+    let newFetchingTilesetInfo = this.state.fetchingTilesetInfo;
+    switch (data.state) {
+      case "loading":
+        newCoverVisible = true;
+        newFetchingTilesetInfo = true;
+        break;
+      case "update_start":
+        newCoverVisible = true;
+        newCoverVisible = (this.state.fetchingTilesetInfo);
+        break;
+      case "update_end":
+        newCoverVisible = (this.state.fetchingTilesetInfo);
+        newFetchingTilesetInfo = false;
+        break;
+      case "fetching_tileset_info":
+        newCoverVisible = true;
+        newFetchingTilesetInfo = true;
+        break;
+      case "fetching":
+        newCoverVisible = true;
+        newFetchingTilesetInfo = false;
+        break;
+      case "rendering":
+        newCoverVisible = (this.state.fetchingTilesetInfo);
+        newFetchingTilesetInfo = false;
+        break;
+      default:
+        break;
+    }
+    this.setState({
+      coverVisible: newCoverVisible,
+      fetchingTilesetInfo: newFetchingTilesetInfo,
+    }, () => {
+      // console.log(`coverVisible ${this.state.coverVisible} | fetchingTilesetInfo ${this.state.fetchingTilesetInfo}`);
+    });
+  }
 
   queryHiglassIoForDefaultViewconf = () => {
     const self = this;
@@ -101,6 +147,13 @@ class App extends Component {
       }
     }
     query();
+  }
+
+  toggleHamburger = (e) => {
+    const newHamburgerClosedState = !this.state.hamburgerClosedState;
+    this.setState({
+      hamburgerClosedState: newHamburgerClosedState,
+    });
   }
 
   toggleMode = (e) => {
@@ -135,7 +188,48 @@ class App extends Component {
     return (
       <div className="box">
         <div className="row header">
-          <Navbar fixed="top" dark full>
+          <div className="header-content">
+            <div className="header-hamburger">
+              { (this.state.hamburgerClosedState) 
+              ?
+                <FaBars 
+                  onClick={(e) => this.toggleHamburger(e)}
+                />
+              :
+                <FaTimes 
+                  onClick={(e) => this.toggleHamburger(e)}
+                />
+              }
+              <Drawer
+                open={!this.state.hamburgerClosedState}
+                onClose={this.toggleHamburger}
+                direction='left'
+                className='drawer'
+                duration={150}
+                lockBackgroundScroll={true}
+              >
+                  <FaTimes 
+                    className="drawer-hamburger"
+                    onClick={(e) => this.toggleHamburger(e)}
+                  />
+                  <div className="drawer-title">
+                    {this.state.title}
+                  </div>
+                  <div className="drawer-subtitle">
+                    settings
+                  </div>
+              </Drawer>
+            </div>
+            <div className="header-title">
+              {this.state.title}
+            </div>
+          </div>
+          {/* <Navbar fixed="top" dark full>
+            <Nav>
+              <div>
+                <FaBars />
+              </div>
+            </Nav>
             <NavbarBrand href='/'>{this.state.title}</NavbarBrand>
             <Nav>
               <div className={(this.state.mode === "data") ? "mode-enabled" : "mode-disabled"}>
@@ -150,17 +244,28 @@ class App extends Component {
                 test (higlass-pileup)
               </div>
             </Nav>
-          </Navbar>
+          </Navbar> */}
         </div>
         <div className="row content">
           { (this.state.hgViewconf) 
-            ? 
-            <HiGlassComponent 
-              key={this.state.hgViewKey}
-              ref={(component) => this.hgViewRef = component}
-              options={this.state.hgOptions}
-              viewConfig={this.state.hgViewconf}
-            /> 
+            ?
+            <div className="content-parent"> 
+              { 
+                (!this.state.coverEnabled) 
+                  ? <div /> 
+                  : (this.state.coverVisible) 
+                    ? <div className="cover cover-visible">
+                        <div class="loading" />
+                      </div> 
+                    : <div className="cover cover-not-visible" />
+              }
+              <HiGlassComponent 
+                key={this.state.hgViewKey}
+                ref={(component) => this.hgViewRef = component}
+                options={this.state.hgOptions}
+                viewConfig={this.state.hgViewconf}
+              /> 
+            </div>
             : 
             <div /> }
         </div>

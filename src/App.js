@@ -17,7 +17,10 @@ import "higlass-pileup/dist/higlass-pileup.js";
 import { FaBars, FaTimes, FaToggleOn } from 'react-icons/fa';
 
 import Drawer from 'react-modern-drawer';
-import 'react-modern-drawer/dist/index.css'
+import 'react-modern-drawer/dist/index.css';
+
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 import * as Constants from "./Constants.js";
 
@@ -78,7 +81,7 @@ class App extends Component {
   }
 
   handlePileupTrackStatusChange = (data) => {
-    console.log(`handlePileupTrackStatusChange | ${JSON.stringify(data)}`);
+    // console.log(`handlePileupTrackStatusChange | ${JSON.stringify(data)}`);
     let newCoverVisible = true;
     let newFetchingTilesetInfo = this.state.fetchingTilesetInfo;
     switch (data.state) {
@@ -184,6 +187,71 @@ class App extends Component {
     );    
   }
 
+  drawerContent = () => {
+    const items = [];
+
+    //
+    // • tile width
+    //
+    const tileWidths = {
+      '15': '15k',
+      '30': '30k',
+      '50': '50k',
+      '100': '100k',
+    };
+    const tileWidthLabelsToWidths = {
+      '15': 15000,
+      '30': 30000,
+      '50': 50000,
+      '100': 100000,
+    };
+    const tileWidthsToKeys = {
+      15000: '15',
+      30000: '30',
+      50000: '50',
+      100000: '100',
+    };
+    const tileWidthSliderStyle = { width: 'calc(100% - 30px)', margin: 10 };
+    const self = this;
+    function handleTileWidthSliderChange(value) {
+      const newTileWidth = tileWidthLabelsToWidths[value];
+      const newHgViewconf = self.state.hgViewconf;
+      newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = newTileWidth;
+      self.setState({
+        hgViewconf: newHgViewconf,
+      });
+      // console.log(`${newTileWidth}`);
+      // console.log(`${JSON.stringify(newHgViewconf)}`);
+    }
+    const minimumTileWidth = parseInt(tileWidthsToKeys[Constants.appMinimumTileWidth]);
+    const defaultTileWidth = parseInt(tileWidthsToKeys[Constants.appDefaultTileWidth]);
+    // console.log(`${minimumTileWidth} | ${defaultTileWidth}`);
+    items.push(<div>
+      <div>
+        • tile width
+      </div>
+      <div style={tileWidthSliderStyle}>
+        <Slider 
+          min={minimumTileWidth}
+          marks={tileWidths} 
+          step={null} 
+          onChange={handleTileWidthSliderChange} 
+          defaultValue={defaultTileWidth}
+          trackStyle={{ backgroundColor: 'darkgrey' }}
+          railStyle={{ backgroundColor: 'rgb(220,220,220)' }}
+          handleStyle={{
+            borderColor: 'darkgrey',
+            backgroundColor: 'rgb(60,60,60)',
+          }}
+          dotStyle={{borderColor: 'rgb(220,220,220)'}}
+          activeDotStyle={{ borderColor: 'darkgrey' }}
+          />
+      </div>
+    </div>);
+
+    return items;
+  }
+
   render() {
     return (
       <div className="box">
@@ -217,6 +285,9 @@ class App extends Component {
                   </div>
                   <div className="drawer-subtitle">
                     settings
+                  </div>
+                  <div className="drawer-content">
+                    {this.drawerContent()}
                   </div>
               </Drawer>
             </div>

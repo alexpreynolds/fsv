@@ -62,6 +62,9 @@ export const gimelbrantTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.am
 export const gimelbrantTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam.bai";
 export const hg38ChromsizesURL = "https://areynolds-us-west-2.s3.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes";
 
+export const appMinimumTileWidth = 15000;
+export const appDefaultTileWidth = 30000;
+
 export const gimelbrantHiglassPileupViewconf = {
   "editable": true,
   "zoomFixed" : false,
@@ -172,7 +175,7 @@ export const gimelbrantHiglassPileupViewconf = {
               "baiUrl": gimelbrantTestBAIURL,
               "chromSizesUrl": hg38ChromsizesURL,
               "options": {
-                  "maxTileWidth": 35000
+                  "maxTileWidth": appDefaultTileWidth,
               },
             },
           },

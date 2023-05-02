@@ -10,6 +10,7 @@
     "bootstrap": "^5.2.3",
     "higlass": "^1.12.2",
     "higlass-pileup": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-pileup.git#methylation",
+    "rc-slider": "^10.1.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-icons": "^4.8.0",

@@ -142,6 +142,8 @@ class App extends Component {
     });
   }, 100);
 
+  isAutocompleteEnabled = () => (this.state.mode !== Constants.appModeLabels.test);
+
   updateViewerLocation = (event) => {
     if (!this.state.chromInfo) return;
     const chrStartPos = this.state.chromInfo.absToChr(event.xDomain[0]);
@@ -634,6 +636,7 @@ class App extends Component {
                 title={"Search for a gene of interest or jump to a genomic interval"}
                 suggestionsClassName={"suggestions"}
                 isMobile={false}
+                isDisabled={!this.isAutocompleteEnabled()}
               />
             </div>
             <div className="header-location">

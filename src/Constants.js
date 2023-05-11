@@ -29,6 +29,9 @@ export const appDefaultHgViewRegionUpstreamPadding = 5000;
 export const appDefaultHgViewRegionDownstreamPadding = 5000;
 export const appDefaultAutocompleteInputPlaceholder = "Specify an interval or gene";
 export const appDefaultHgViewGenePaddingFraction = 0.2;
+export const appHeaderHeight = 30;
+export const appChromosomeTrackHeight = 30;
+export const appGeneAnnotationTrackHeight = 80;
 
 export const assemblyChromosomes = {
   'hg19':[

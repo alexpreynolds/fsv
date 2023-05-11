@@ -30,10 +30,23 @@ import * as Constants from "./Constants.js";
 
 import "./App.css";
 
+function debounce(fn, ms) {
+  let timer;
+  return _ => {
+    clearTimeout(timer);
+    timer = setTimeout(_ => {
+      timer = null;
+      fn.apply(this, arguments);
+    }, ms);
+  };
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      windowHeight: undefined,
+      windowWidth: undefined,
       title: "fiber-seq viewer",
       assembly: Constants.appDefaultAssembly,
       mode: Constants.appDefaultMode,
@@ -83,6 +96,8 @@ class App extends Component {
 
   componentDidMount() {
     // this.queryHiglassIoForDefaultViewconf();
+    this.handleResize();
+    window.addEventListener('resize', this.handleResize);
     setTimeout(() => {
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
@@ -97,7 +112,35 @@ class App extends Component {
 
   componentWillUnmount() {
     this.pileupTrackStatusMonitor.close();
+    window.removeEventListener('resize', this.handleResize);
   }
+
+  handleResize = debounce(() => {
+    const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
+    switch (this.state.mode) {
+      case Constants.appModeLabels.test:
+        newHgViewconf.views[0].tracks.top[0].height = parseInt(window.innerHeight) - Constants.appHeaderHeight;
+        break;
+      case Constants.appModeLabels.cd3plus:
+        newHgViewconf.views[0].tracks.top[2].height = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight;
+        break;
+      case Constants.appModeLabels.hudep:
+        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight;
+        const perPileupHeight = parseInt(totalAvailablePileupHeight / 2);
+        newHgViewconf.views[0].tracks.top[1].height = perPileupHeight;
+        newHgViewconf.views[0].tracks.top[3].height = perPileupHeight;
+        break;
+      default:
+        throw new Error("Unknown mode passed to handleResize fn");
+    }
+    this.setState({
+      windowHeight: window.innerHeight,
+      windowWidth: window.innerWidth,
+      hgViewconf: newHgViewconf,
+    }, () => {
+      console.log(`${this.state.windowWidth} x ${this.state.windowHeight}`);
+    });
+  }, 100);
 
   updateViewerLocation = (event) => {
     if (!this.state.chromInfo) return;

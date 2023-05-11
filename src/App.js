@@ -204,6 +204,7 @@ class App extends Component {
       coverVisible: newCoverVisible,
       fetchingTilesetInfo: newFetchingTilesetInfo,
     }, () => {
+      this.handleResize();
       // console.log(`coverVisible ${this.state.coverVisible} | fetchingTilesetInfo ${this.state.fetchingTilesetInfo}`);
     });
   }

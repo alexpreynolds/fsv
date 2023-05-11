@@ -565,9 +565,10 @@ class App extends Component {
   };
 
   currentPosition = () => {
-    if (!this.state.hgViewCurrentPosition) return "";
+    if ((!this.state.hgViewCurrentPosition) || (this.state.mode === Constants.appModeLabels.test)) return "";
     const p = this.state.hgViewCurrentPosition;
-    return (p.left.chrom === p.right.chrom) ? `${p.left.chrom}:${p.left.start}-${p.right.stop} | ${this.state.assembly}` : `${p.left.chrom}:${p.left.start} - ${p.right.chrom}:${p.right.stop} | ${this.state.assembly}`;
+    const scale = Helpers.calculateScale(p.left.chrom, p.right.chrom, p.left.start, p.right.stop, this, true);
+    return (p.left.chrom === p.right.chrom) ? `${p.left.chrom}:${p.left.start}-${p.right.stop} ${scale.scaleAsStr}` : `${p.left.chrom}:${p.left.start} - ${p.right.chrom}:${p.right.stop} ${scale.scaleAsStr}`;
   }
 
   render() {

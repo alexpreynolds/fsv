@@ -107,3 +107,61 @@ export const getTrueChromosomeName = (assembly, chromosomeName) => {
   // console.log(`chromosomeNamesLC.indexOf(chromosomeName.toLowerCase()) ${chromosomeNamesLC.indexOf(chromosomeName.toLowerCase())}`);
   return chromosomeNamesOriginal[indexOfChromosomeNameOfInterest];
 }
+
+export const log10 = (val) => Math.log(val) / Math.LN10;
+
+export const calculateScale = (leftChr, rightChr, start, stop, self, includeAssembly) => {
+  //
+  // get current scale difference
+  //
+  let diff = 0;
+  let log10Diff = 0;
+  let scaleAsStr = "";
+  const chromsAreIdentical = (leftChr === rightChr);
+  if (chromsAreIdentical) {
+    diff = parseInt(stop) - parseInt(start);
+  }
+  else {
+    //console.log(`updateScale > chromosomes are different`);
+    const leftDiff = parseInt(Constants.assemblyBounds[self.state.assembly][leftChr]['ub']) - parseInt(start);
+    const rightDiff = parseInt(stop);
+    const allChrs = Object.keys(Constants.assemblyBounds[self.state.assembly]).sort((a, b) => { return parseInt(a.replace("chr", "")) - parseInt(b.replace("chr", "")); });
+    //console.log(`leftChr ${leftChr} | rightChr ${rightChr} | start ${start} | stop ${stop} | leftDiff ${leftDiff} | rightDiff ${rightDiff} | allChrs ${allChrs}`);
+    let log10DiffFlag = false;
+    for (let i = 0; i < allChrs.length; i++) {
+      const currentChr = allChrs[i];
+      if (currentChr === leftChr) {
+        //console.log(`adding ${leftDiff} for chromosome ${currentChr}`);
+        diff += (leftDiff > 0) ? leftDiff : 1;
+        log10DiffFlag = true;
+      }
+      else if (currentChr === rightChr) {
+        //console.log(`adding ${rightDiff} for chromosome ${currentChr}`);
+        diff += (rightDiff > 0) ? rightDiff : 1;
+        log10DiffFlag = false;
+        break;
+      }
+      else if (log10DiffFlag) {
+        //console.log(`adding ${Constants.assemblyBounds[self.state.assembly][currentChr]['ub']} for chromosome ${currentChr}`);
+        diff += Constants.assemblyBounds[self.state.assembly][currentChr]['ub'];
+      }
+    }
+  }
+  //console.log(`calculateScale ${diff}`);
+  log10Diff = log10(diff);
+  scaleAsStr = (log10Diff < 3) ? `${Math.ceil(diff/100)*100}nt` :
+               (log10Diff < 4) ? `${Math.floor(diff/1000)}kb` :
+               (log10Diff < 5) ? `${Math.floor(diff/1000)}kb` :
+               (log10Diff < 6) ? `${Math.floor(diff/1000)}kb` :
+               (log10Diff < 7) ? `${Math.floor(diff/1000000)}Mb` :
+               (log10Diff < 8) ? `${Math.floor(diff/1000000)}Mb` :
+               (log10Diff < 9) ? `${Math.floor(diff/1000000)}Mb` :
+                                 `${Math.floor(diff/1000000000)}Gb`;
+  // scaleAsStr = `(~${scaleAsStr})`;
+  scaleAsStr = (includeAssembly) ? `(~${scaleAsStr} | ${self.state.assembly})` : `(~${scaleAsStr})`;
+  return { 
+    diff: diff, 
+    scaleAsStr: scaleAsStr,
+    chromsAreIdentical: chromsAreIdentical
+  };
+}

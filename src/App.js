@@ -14,6 +14,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // ref. https://github.com/higlass/higlass-pileup
 import "higlass-pileup/dist/higlass-pileup.js";
 
+// higlass-transcripts
+// cf. https://github.com/higlass/higlass-transcripts
+import "higlass-transcripts/dist/higlass-transcripts.js";
+
 import { FaBars, FaTimes, FaAngleDown, FaRegCircle, FaRegDotCircle, FaAngleRight, FaToggleOn } from 'react-icons/fa';
 
 import Drawer from 'react-modern-drawer';
@@ -122,13 +126,13 @@ class App extends Component {
         newHgViewconf.views[0].tracks.top[0].height = parseInt(window.innerHeight) - Constants.appHeaderHeight;
         break;
       case Constants.appModeLabels.cd3plus:
-        newHgViewconf.views[0].tracks.top[2].height = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight;
+        newHgViewconf.views[0].tracks.top[3].height = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
         const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight;
         const perPileupHeight = parseInt(totalAvailablePileupHeight / 2);
-        newHgViewconf.views[0].tracks.top[1].height = perPileupHeight;
-        newHgViewconf.views[0].tracks.top[3].height = perPileupHeight;
+        newHgViewconf.views[0].tracks.top[2].height = perPileupHeight;
+        newHgViewconf.views[0].tracks.top[5].height = perPileupHeight;
         break;
       default:
         throw new Error("Unknown mode passed to handleResize fn");
@@ -300,12 +304,12 @@ class App extends Component {
         break;
       case Constants.appModeLabels.cd3plus:
         newHgViewconf = Constants.cd3plusHiglassPileupViewconf;
-        newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = this.state.hgViewTileWidth;
+        newHgViewconf.views[0].tracks.top[3].data.options.maxTileWidth = this.state.hgViewTileWidth;
         break;
       case Constants.appModeLabels.hudep:
         newHgViewconf = Constants.hudepHiglassPileupViewconf;
-        newHgViewconf.views[0].tracks.top[1].data.options.maxTileWidth = this.state.hgViewTileWidth;
-        newHgViewconf.views[0].tracks.top[3].data.options.maxTileWidth = this.state.hgViewTileWidth;
+        newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = this.state.hgViewTileWidth;
+        newHgViewconf.views[0].tracks.top[5].data.options.maxTileWidth = this.state.hgViewTileWidth;
         break;
       default:
         throw new Error("Unknown mode passed to switchToMode fn");
@@ -496,11 +500,11 @@ class App extends Component {
         case Constants.appModeLabels.test:
           break;
         case Constants.appModeLabels.cd3plus:
-          newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = newTileWidth;
+          newHgViewconf.views[0].tracks.top[3].data.options.maxTileWidth = newTileWidth;
           break;
         case Constants.appModeLabels.hudep:
-          newHgViewconf.views[0].tracks.top[1].data.options.maxTileWidth = newTileWidth;
-          newHgViewconf.views[0].tracks.top[3].data.options.maxTileWidth = newTileWidth;
+          newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = newTileWidth;
+          newHgViewconf.views[0].tracks.top[5].data.options.maxTileWidth = newTileWidth;
           break;
         default:
           throw new Error("Unknown mode specified for tile width slider change");
@@ -632,6 +636,7 @@ class App extends Component {
                 mapIndexDHSSetName={Constants.mapIndexDHSSetName}
                 onChangeLocation={this.onChangeSearchInputLocation}
                 onChangeInput={this.onChangeSearchInput}
+                onClick={(e) => e.currentTarget.blur()}
                 onFocus={this.onFocusSearchInput}
                 onPostFocus={this.closeDrawer}
                 title={"Search for a gene of interest or jump to a genomic interval"}

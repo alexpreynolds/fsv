@@ -26,6 +26,10 @@ body {
   touch-action: none !important;
 }
 
+*:focus {
+  outline: none;
+}
+
 .content-parent {
   padding: 0;
   margin: 0;

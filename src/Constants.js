@@ -24,6 +24,7 @@ export const appDefaultMode = "cd3plus";
 export const appMinimumTileWidth = 15000;
 export const appDefaultTileWidth = 30000;
 export const appDefaultHgViewEditable = false;
+export const appDefaultHgViewTranscriptsDirectional = true;
 export const appDefaultHgViewIndexDHSPadding = 250;
 export const appDefaultHgViewRegionUpstreamPadding = 5000;
 export const appDefaultHgViewRegionDownstreamPadding = 5000;
@@ -31,8 +32,9 @@ export const appDefaultAutocompleteInputPlaceholder = "Specify an interval or ge
 export const appDefaultHgViewGenePaddingFraction = 0.2;
 export const appHeaderHeight = 30;
 export const appChromosomeTrackHeight = 30;
-export const appCoverageTrackHeight = 30;
+export const appCoverageTrackHeight = 20;
 export const appGeneAnnotationTrackHeight = 120;
+export const appGapTrackHeight = 3;
 export const appDefaultFiberSeqReadHexColor = "#663399";
 export const appDefaultFiberSeqReadControlHexColor = "#336699";
 export const appDefaultFiberSeqReadTreatmentHexColor = "#009966";
@@ -201,7 +203,7 @@ export const cd3plusHiglassPileupViewconf = {
   "exportViewUrl": "/api/v1/viewconfs",
   "views": [
     {
-      "uid" : "abcd-cd3plus",
+      "uid" : "abcd0001",
       "initialXDomain": [
         1813933893,
         1813936188
@@ -235,43 +237,9 @@ export const cd3plusHiglassPileupViewconf = {
               "name" : "chromosomes_hg38",
               "backgroundColor" : "white"
             },
-            "height" : 30,
+            "height" : appChromosomeTrackHeight,
             "position" : "top"
           },
-          // {
-          //   "name" : "annotations_GENCODE_v28",
-          //   "created" : "2019-04-11T15:12:04.391612Z",
-          //   "project" : "bLwQYp24jRG2YyAxGaGGwMg",
-          //   "project_name" : "",
-          //   "description" : "",
-          //   "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
-          //   "tilesetUid" : "OAc6qvgJRP2cEr78Eoj79w",
-          //   "uid" : "d3c2b209-63e6-4fa3-97d0-9d2ddccdf04e",
-          //   "type" : "horizontal-gene-annotations",
-          //   "options" : {
-          //     "fontSize" : 11,
-          //     "labelColor" : "black",
-          //     "labelPosition" : "hidden",
-          //     "labelLeftMargin" : 0,
-          //     "labelRightMargin" : 0,
-          //     "labelTopMargin" : 0,
-          //     "labelBottomMargin" : 0,
-          //     "plusStrandColor" : "blue",
-          //     "minusStrandColor" : "red",
-          //     "trackBorderWidth" : 0,
-          //     "trackBorderColor" : "black",
-          //     "showMousePosition" : true,
-          //     "mousePositionColor" : "#999999",
-          //     "geneAnnotationHeight" : 10,
-          //     "geneLabelPosition" : "outside",
-          //     "geneStrandSpacing" : 4,
-          //     "name" : "annotations_GENCODE_v28",
-          //     "backgroundColor" : "white"
-          //   },
-          //   "height" : 80,
-          //   "header" : "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-          //   "position" : "top"
-          // },
           {
             "name": "gencode.v38.annotation.gtf.higlass-transcripts.hgnc.090721.forceHGNC.coloredByVocabulary.beddb",
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
@@ -279,7 +247,7 @@ export const cd3plusHiglassPileupViewconf = {
             "type": "horizontal-transcripts",
             "uid": "cv0JX4TlTIi-D1aEpV-C0A",
             "options": {
-              "blockStyle": "directional",
+              "blockStyle": "directional", // "UCSC-like",
               "maxRows": 6,
               "maxTexts": 50,
               "labelFontSize": 10,
@@ -300,17 +268,17 @@ export const cd3plusHiglassPileupViewconf = {
             "height" : appGeneAnnotationTrackHeight,
           },
           {
-            "name": "fsv.d2.stim.chr11.coveragePerBase.filtered.versionSort.bedgraph.bw",
+            "name": "fsfsv.d2.stim.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
             "type": "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
-            "tilesetUid" : "FnKYTBASTGul9r4s8p55Wg",
+            "tilesetUid" : "Gm94-g3wTBaaeby0q86VBQ",
             "uid" : "bwtest-001",
             "options" : {
-              "name": "fsv.d2.stim.chr11.coveragePerBase.filtered.versionSort.bedgraph.bw",
+              "name": "fsv.d2.stim.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,
-              "valueScaleMax": 160,
+              // "valueScaleMax": 20,
               "lineStrokeWidth": 1,
               "lineStrokeColor": appDefaultFiberSeqReadHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadHexColor],
@@ -318,6 +286,12 @@ export const cd3plusHiglassPileupViewconf = {
               "showTooltip": true,
               "minHeight": appCoverageTrackHeight,
             },
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
           },
           {
             "type": "pileup",
@@ -380,7 +354,7 @@ export const hudepHiglassPileupViewconf = {
   "exportViewUrl": "/api/v1/viewconfs",
   "views": [
     {
-      "uid" : "abcd-hudep",
+      "uid" : "abcd0002",
       "initialXDomain": [
         1813933893,
         1813936188
@@ -414,21 +388,21 @@ export const hudepHiglassPileupViewconf = {
               "name" : "chromosomes_hg38",
               "backgroundColor" : "white"
             },
-            "height" : 30,
+            "height" : appChromosomeTrackHeight,
             "position" : "top"
           },
           {
-            "name": "HUDEP.control.DS182418.chr11.coveragePerBase.filtered.versionSort.bedgraph.bw",
+            "name": "HUDHUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
             "type": "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
-            "tilesetUid" : "U0GVSE2QQSCTMCDsROagKA",
+            "tilesetUid" : "IpWzYlb8T4SDtV9R1WWTXw",
             "uid" : "bwtest-001",
             "options" : {
-              "name": "HUDEP.control.DS182418.chr11.coveragePerBase.filtered.versionSort.bedgraph.bw",
+              "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,
-              "valueScaleMax": 160,
+              // "valueScaleMax": 20,
               "lineStrokeWidth": 1,
               "lineStrokeColor": appDefaultFiberSeqReadControlHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadControlHexColor],
@@ -436,6 +410,12 @@ export const hudepHiglassPileupViewconf = {
               "showTooltip": true,
               "minHeight": appCoverageTrackHeight,
             },
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
           },
           {
             "type": "pileup",
@@ -479,7 +459,7 @@ export const hudepHiglassPileupViewconf = {
             "type": "horizontal-transcripts",
             "uid": "cv0JX4TlTIi-D1aEpV-C0A",
             "options": {
-              "blockStyle": "directional",
+              "blockStyle": "directional", // "UCSC-like",
               "maxRows": 6,
               "maxTexts": 50,
               "labelFontSize": 10,
@@ -500,17 +480,17 @@ export const hudepHiglassPileupViewconf = {
             "height" : appGeneAnnotationTrackHeight,
           },
           {
-            "name": "HUDEP.treatment.DS182417.chr11.coveragePerBase.filtered.versionSort.bedgraph.bw",
+            "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
             "type": "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
-            "tilesetUid" : "ARKksdWkTwisjtgY9J2Smg",
+            "tilesetUid" : "Whb3mOktR7i3wVrsMeailg",
             "uid" : "bwtest-002",
             "options" : {
-              "name": "HUDEP.treatment.DS182417.chr11.coveragePerBase.filtered.versionSort.bedgraph.bw",
+              "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,
-              "valueScaleMax": 160,
+              "valueScaleMax": 20,
               "lineStrokeWidth": 1,
               "lineStrokeColor": appDefaultFiberSeqReadTreatmentHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadTreatmentHexColor],
@@ -518,6 +498,12 @@ export const hudepHiglassPileupViewconf = {
               "showTooltip": true,
               "minHeight": appCoverageTrackHeight,
             },
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
           },
           {
             "type": "pileup",

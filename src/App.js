@@ -71,6 +71,8 @@ class App extends Component {
       },
       hgViewEditable: Constants.appDefaultHgViewEditable,
       hgViewEditableToggleEnabled: true,
+      hgViewTranscriptsDirectional: Constants.appDefaultHgViewTranscriptsDirectional,
+      hgViewTranscriptsDirectionalEnabled: true,
       hgViewTileWidth: Constants.appDefaultTileWidth,
       hgViewCurrentPosition: null,
       chromInfo: null,
@@ -88,9 +90,16 @@ class App extends Component {
       });
 
     this.state.hgViewconf.editable = this.state.hgViewEditable;
-    this.state.hgViewconf.views[0].tracks.top.forEach((v, i) => {
-      if (v.type === 'pileup') {
-        v.data.options.maxTileWidth = this.state.hgViewTileWidth;
+    this.state.hgViewconf.views[0].tracks.top.forEach((track, i) => {
+      switch (track.type) {
+        case "horizontal-transcripts":
+          track.options.blockStyle = (this.state.hgViewTranscriptsDirectional) ? "directional" : "UCSC-like";
+          break;
+        case "pileup":
+          track.data.options.maxTileWidth = this.state.hgViewTileWidth;
+          break;
+        default:
+          break;  
       }
     });
 
@@ -121,28 +130,37 @@ class App extends Component {
 
   handleResize = debounce(() => {
     const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
+    let newPileupHeight = 0;
     switch (this.state.mode) {
       case Constants.appModeLabels.test:
-        newHgViewconf.views[0].tracks.top[0].height = parseInt(window.innerHeight) - Constants.appHeaderHeight;
+        newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight;
         break;
       case Constants.appModeLabels.cd3plus:
-        newHgViewconf.views[0].tracks.top[3].height = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGeneAnnotationTrackHeight;
+        newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGapTrackHeight - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
-        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight;
+        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight - 2 * (Constants.appCoverageTrackHeight + Constants.appGapTrackHeight);
         const perPileupHeight = parseInt(totalAvailablePileupHeight / 2);
-        newHgViewconf.views[0].tracks.top[2].height = perPileupHeight;
-        newHgViewconf.views[0].tracks.top[5].height = perPileupHeight;
+        newPileupHeight = perPileupHeight;
         break;
       default:
         throw new Error("Unknown mode passed to handleResize fn");
     }
+    newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+      switch (track.type) {
+        case "pileup":
+          track.height = newPileupHeight;
+          break;
+        default:
+          break;
+      }
+    });
     this.setState({
       windowHeight: window.innerHeight,
       windowWidth: window.innerWidth,
       hgViewconf: newHgViewconf,
     }, () => {
-      console.log(`${this.state.windowWidth} x ${this.state.windowHeight}`);
+      // console.log(`${this.state.windowWidth} x ${this.state.windowHeight}`);
     });
   }, 100);
 
@@ -169,7 +187,7 @@ class App extends Component {
     };
     this.setState({
       hgViewCurrentPosition: newHgViewCurrentPosition,
-    })
+    });
   }
 
   handlePileupTrackStatusChange = (data) => {
@@ -254,6 +272,8 @@ class App extends Component {
 
   toggleMode = (e) => {
     if (!this.state.modeToggleEnabled) return;
+    const currentPosition = this.state.hgViewCurrentPosition;
+    console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
     const newMode = (this.state.mode === Constants.appModeLabels.test) ? Constants.appModeLabels.cd3plus : Constants.appModeLabels.test;
     const newHgViewconf = (this.state.mode === Constants.appModeLabels.test) ? Constants.cd3plusHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
     // console.log(`toggleMode | ${this.state.mode} -> ${newMode}`);
@@ -267,9 +287,20 @@ class App extends Component {
       // this.updateChromosomeInfoObject((this.state.mode === Constants.appModeLabels.cd3plus) ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
       switch (this.state.mode) {
         case Constants.appModeLabels.test:
+          break;
         case Constants.appModeLabels.cd3plus:
         case Constants.appModeLabels.hudep:
-          this.zoomToChr11HBG2();
+          // this.zoomToChr11HBG2();
+          setTimeout(() => {
+            this.hgViewUpdatePosition(
+              this.state.assembly,
+              currentPosition.left.chrom, 
+              currentPosition.left.start, 
+              currentPosition.right.stop, 
+              currentPosition.right.chrom, 
+              currentPosition.left.start, 
+              currentPosition.right.stop)
+          }, 100);
           break;
         default:
           throw new Error("Unknown mode passed to switchToMode fn");
@@ -286,9 +317,52 @@ class App extends Component {
       hgViewEditable: newHgViewEditable,
       hgViewconf: newHgViewconf,
     }, () => {
+      const currentPosition = this.state.hgViewCurrentPosition;
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
       });
+      setTimeout(() => {
+        this.hgViewUpdatePosition(
+          this.state.assembly,
+          currentPosition.left.chrom, 
+          currentPosition.left.start, 
+          currentPosition.right.stop, 
+          currentPosition.right.chrom, 
+          currentPosition.left.start, 
+          currentPosition.right.stop)
+      }, 100);
+    });
+  }
+
+  toggleHgViewTranscriptsDirectional = (e) => {
+    if (!this.state.hgViewTranscriptsDirectionalEnabled) return;
+    const newHgViewKey = this.state.newHgViewKey + 1;
+    const newHgViewTranscriptsDirectional = !this.state.hgViewTranscriptsDirectional;
+    const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
+    newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+      if (track.type === "horizontal-transcripts") {
+        track.options.blockStyle = (newHgViewTranscriptsDirectional) ? "directional" : "UCSC-like";
+      }
+    })
+    this.setState({
+      hgViewKey: newHgViewKey,
+      hgViewTranscriptsDirectional: newHgViewTranscriptsDirectional,
+      hgViewconf: newHgViewconf,
+    }, () => {
+      const currentPosition = this.state.hgViewCurrentPosition;
+      this.hgViewRef.api.on("location", (event) => { 
+        this.updateViewerLocation(event);
+      });
+      setTimeout(() => {
+        this.hgViewUpdatePosition(
+          this.state.assembly,
+          currentPosition.left.chrom, 
+          currentPosition.left.start, 
+          currentPosition.right.stop, 
+          currentPosition.right.chrom, 
+          currentPosition.left.start, 
+          currentPosition.right.stop)
+      }, 100);
     });
   }
 
@@ -297,6 +371,8 @@ class App extends Component {
     // console.log(`switchToMode m ${JSON.stringify(m)}`);
     const newHgViewKey = this.state.hgViewKey + 1;
     const newMode = m;
+    const currentPosition = this.state.hgViewCurrentPosition;
+    console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
     let newHgViewconf = {};
     switch (m) {
       case Constants.appModeLabels.test:
@@ -304,16 +380,25 @@ class App extends Component {
         break;
       case Constants.appModeLabels.cd3plus:
         newHgViewconf = Constants.cd3plusHiglassPileupViewconf;
-        newHgViewconf.views[0].tracks.top[3].data.options.maxTileWidth = this.state.hgViewTileWidth;
         break;
       case Constants.appModeLabels.hudep:
         newHgViewconf = Constants.hudepHiglassPileupViewconf;
-        newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = this.state.hgViewTileWidth;
-        newHgViewconf.views[0].tracks.top[5].data.options.maxTileWidth = this.state.hgViewTileWidth;
         break;
       default:
         throw new Error("Unknown mode passed to switchToMode fn");
     }
+    newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+      switch (track.type) {
+        case "horizontal-transcripts":
+          track.options.blockStyle = (this.state.hgViewTranscriptsDirectional) ? "directional" : "UCSC-like";
+          break;
+        case "pileup":
+          track.data.options.maxTileWidth = this.state.hgViewTileWidth;
+          break;
+        default:
+          break;
+      }
+    });
     newHgViewconf.editable = this.state.hgViewEditable;
 
     this.setState({
@@ -330,8 +415,15 @@ class App extends Component {
         case Constants.appModeLabels.cd3plus:
         case Constants.appModeLabels.hudep:
           setTimeout(() => {
-            this.zoomToChr11HBG2();
-          }, 500);
+            this.hgViewUpdatePosition(
+              this.state.assembly,
+              currentPosition.left.chrom, 
+              currentPosition.left.start, 
+              currentPosition.right.stop, 
+              currentPosition.right.chrom, 
+              currentPosition.left.start, 
+              currentPosition.right.stop)
+          }, 100);
           break;
         default:
           throw new Error("Unknown mode passed to switchToMode fn");
@@ -388,8 +480,8 @@ class App extends Component {
   }
 
   hgViewUpdatePosition = (genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight) => {
-    // console.log("[hgViewUpdatePosition]", genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight);
     if (!this.hgViewRef || !this.state.chromInfo) return;
+    // console.log("[hgViewUpdatePosition]", genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight);
     this.hgViewRef.zoomTo(
       this.state.hgViewconf.views[0].uid,
       this.state.chromInfo.chrToAbs([chrLeft, startLeft]),
@@ -404,11 +496,11 @@ class App extends Component {
     this.hgViewUpdatePosition(
       this.state.assembly,
       'chr11',
-      5250000,
-      5260000,
+      5245000,
+      5265000,
       'chr11',
-      5250000,
-      5260000,
+      5245000,
+      5265000,
     );  
   }
 
@@ -496,27 +588,37 @@ class App extends Component {
       const newHgViewKey = self.state.hgViewKey + 1;
       const newTileWidth = tileWidthLabelsToWidths[value];
       const newHgViewconf = JSON.parse(JSON.stringify(self.state.hgViewconf));
-      switch (self.state.mode) {
-        case Constants.appModeLabels.test:
-          break;
-        case Constants.appModeLabels.cd3plus:
-          newHgViewconf.views[0].tracks.top[3].data.options.maxTileWidth = newTileWidth;
-          break;
-        case Constants.appModeLabels.hudep:
-          newHgViewconf.views[0].tracks.top[2].data.options.maxTileWidth = newTileWidth;
-          newHgViewconf.views[0].tracks.top[5].data.options.maxTileWidth = newTileWidth;
-          break;
-        default:
-          throw new Error("Unknown mode specified for tile width slider change");
-      }
+      newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+        switch (track.type) {
+          case "horizontal-transcripts":
+            track.options.blockStyle = (self.state.hgViewTranscriptsDirectional) ? "directional" : "UCSC-like";
+            break;
+          case "pileup":
+            track.data.options.maxTileWidth = newTileWidth;
+            break;
+          default:
+            break;
+        }
+      });
       self.setState({
         hgViewKey: newHgViewKey,
         hgViewconf: newHgViewconf,
         hgViewTileWidth: newTileWidth,
       }, () => {
+        const currentPosition = self.state.hgViewCurrentPosition;
         self.hgViewRef.api.on("location", (event) => { 
           self.updateViewerLocation(event);
         });
+        setTimeout(() => {
+          self.hgViewUpdatePosition(
+            self.state.assembly,
+            currentPosition.left.chrom, 
+            currentPosition.left.start, 
+            currentPosition.right.stop, 
+            currentPosition.right.chrom, 
+            currentPosition.left.start, 
+            currentPosition.right.stop);
+        }, 100);
       });
       // console.log(`${newTileWidth}`);
       // console.log(`${JSON.stringify(newHgViewconf)}`);
@@ -547,11 +649,24 @@ class App extends Component {
     </div>);
 
     //
-    // • editable
+    // • options
     //
     items.push(<div style={drawerItemGroupStyle}>
       <div>
         <FaAngleDown /> options
+      </div>
+      <div style={Object.assign({}, drawerItemContentStyle, { display: "flex" })}>
+        <div className={(this.state.hgViewTranscriptsDirectional) ? "flag-enabled" : "flag-disabled"}>
+          directional
+        </div>
+        &nbsp;&nbsp;
+        <FaToggleOn
+          onClick={(e) => this.toggleHgViewTranscriptsDirectional(e)}
+          className={(this.state.hgViewTranscriptsDirectional) ? "fa-toggle fa-toggle-on" : "fa-toggle fa-toggle-off"} />
+        &nbsp;&nbsp;
+        <div className={(!this.state.hgViewTranscriptsDirectional) ? "flag-enabled" : "flag-disabled"}>
+          UCSC-like
+        </div>
       </div>
       <div style={Object.assign({}, drawerItemContentStyle, { display: "flex" })}>
         <div className={(this.state.hgViewEditable) ? "flag-enabled" : "flag-disabled"}>

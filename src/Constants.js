@@ -268,8 +268,8 @@ export const cd3plusHiglassPileupViewconf = {
             "height" : appGeneAnnotationTrackHeight,
           },
           {
-            "name": "fsfsv.d2.stim.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
-            "type": "1d-heatmap", // "horizontal-line",
+            "name": "fsv.d2.stim.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
+            "type": "bar", // "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid" : "Gm94-g3wTBaaeby0q86VBQ",
@@ -394,7 +394,7 @@ export const hudepHiglassPileupViewconf = {
           },
           {
             "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
-            "type": "1d-heatmap", // "horizontal-line",
+            "type": "bar", // "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid" : "IpWzYlb8T4SDtV9R1WWTXw",
@@ -483,7 +483,7 @@ export const hudepHiglassPileupViewconf = {
           },
           {
             "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
-            "type": "1d-heatmap", // "horizontal-line",
+            "type": "bar", // "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid" : "Whb3mOktR7i3wVrsMeailg",

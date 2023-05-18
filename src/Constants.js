@@ -275,6 +275,7 @@ export const cd3plusHiglassPileupViewconf = {
             "tilesetUid" : "Gm94-g3wTBaaeby0q86VBQ",
             "uid" : "bwtest-001",
             "options" : {
+              "labelPosition": "hidden",
               "name": "fsv.d2.stim.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,
@@ -392,13 +393,14 @@ export const hudepHiglassPileupViewconf = {
             "position" : "top"
           },
           {
-            "name": "HUDHUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
+            "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
             "type": "1d-heatmap", // "horizontal-line",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid" : "IpWzYlb8T4SDtV9R1WWTXw",
             "uid" : "bwtest-001",
             "options" : {
+              "labelPosition": "hidden",
               "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,
@@ -487,6 +489,7 @@ export const hudepHiglassPileupViewconf = {
             "tilesetUid" : "Whb3mOktR7i3wVrsMeailg",
             "uid" : "bwtest-002",
             "options" : {
+              "labelPosition": "hidden",
               "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,

@@ -336,7 +336,7 @@ class App extends Component {
 
   toggleHgViewTranscriptsDirectional = (e) => {
     if (!this.state.hgViewTranscriptsDirectionalEnabled) return;
-    const newHgViewKey = this.state.newHgViewKey + 1;
+    const newHgViewKey = this.state.hgViewKey + 1;
     const newHgViewTranscriptsDirectional = !this.state.hgViewTranscriptsDirectional;
     const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
     newHgViewconf.views[0].tracks.top.forEach((track, i) => {

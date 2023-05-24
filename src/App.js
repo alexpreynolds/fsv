@@ -56,7 +56,7 @@ class App extends Component {
       mode: Constants.appDefaultMode,
       modeToggleEnabled: true,
       hgViewKey: 0,
-      hgViewconf: Constants.cd3plusHiglassPileupViewconf, // Constants.testHiglassPileupViewconf,
+      hgViewconf: {},
       hgOptions: { // http://docs.higlass.io/javascript_api.html#overview
         bounded: true,
         sizeMode: "bounded",
@@ -89,6 +89,20 @@ class App extends Component {
         this.state.chromInfo = newChromInfo;
       });
 
+    switch (this.state.mode) {
+      case "test":
+        this.state.hgViewconf = Constants.testHiglassPileupViewconf;
+        break;
+      case "cd3pos":
+        this.state.hgViewconf = Constants.cd3posHiglassPileupViewconf;
+        break;
+      case "hudep":
+        this.state.hgViewconf = Constants.hudepHiglassPileupViewconf;
+        break;
+      default:
+        throw Error("Unknown application mode; could not set up viewconf in constructor");
+    }
+
     this.state.hgViewconf.editable = this.state.hgViewEditable;
     this.state.hgViewconf.views[0].tracks.top.forEach((track, i) => {
       switch (track.type) {
@@ -115,7 +129,7 @@ class App extends Component {
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
       });
-      if (this.state.mode === Constants.appModeLabels.cd3plus) {
+      if ((this.state.mode === Constants.appModeLabels.cd3pos) || (this.state.mode === Constants.appModeLabels.hudep)) {
         setTimeout(() => {
           this.zoomToChr11HBG2();
         }, 100); 
@@ -135,7 +149,7 @@ class App extends Component {
       case Constants.appModeLabels.test:
         newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight;
         break;
-      case Constants.appModeLabels.cd3plus:
+      case Constants.appModeLabels.cd3pos:
         newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGapTrackHeight - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
@@ -274,8 +288,8 @@ class App extends Component {
     if (!this.state.modeToggleEnabled) return;
     const currentPosition = this.state.hgViewCurrentPosition;
     console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
-    const newMode = (this.state.mode === Constants.appModeLabels.test) ? Constants.appModeLabels.cd3plus : Constants.appModeLabels.test;
-    const newHgViewconf = (this.state.mode === Constants.appModeLabels.test) ? Constants.cd3plusHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
+    const newMode = (this.state.mode === Constants.appModeLabels.test) ? Constants.appModeLabels.cd3pos : Constants.appModeLabels.test;
+    const newHgViewconf = (this.state.mode === Constants.appModeLabels.test) ? Constants.cd3posHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
     // console.log(`toggleMode | ${this.state.mode} -> ${newMode}`);
     this.setState({
       mode: newMode,
@@ -284,11 +298,11 @@ class App extends Component {
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
       });
-      // this.updateChromosomeInfoObject((this.state.mode === Constants.appModeLabels.cd3plus) ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
+      // this.updateChromosomeInfoObject((this.state.mode === Constants.appModeLabels.cd3pos) ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
       switch (this.state.mode) {
         case Constants.appModeLabels.test:
           break;
-        case Constants.appModeLabels.cd3plus:
+        case Constants.appModeLabels.cd3pos:
         case Constants.appModeLabels.hudep:
           // this.zoomToChr11HBG2();
           setTimeout(() => {
@@ -378,8 +392,8 @@ class App extends Component {
       case Constants.appModeLabels.test:
         newHgViewconf = Constants.testHiglassPileupViewconf;
         break;
-      case Constants.appModeLabels.cd3plus:
-        newHgViewconf = Constants.cd3plusHiglassPileupViewconf;
+      case Constants.appModeLabels.cd3pos:
+        newHgViewconf = Constants.cd3posHiglassPileupViewconf;
         break;
       case Constants.appModeLabels.hudep:
         newHgViewconf = Constants.hudepHiglassPileupViewconf;
@@ -412,7 +426,7 @@ class App extends Component {
       switch (this.state.mode) {
         case Constants.appModeLabels.test:
           break;
-        case Constants.appModeLabels.cd3plus:
+        case Constants.appModeLabels.cd3pos:
         case Constants.appModeLabels.hudep:
           setTimeout(() => {
             this.hgViewUpdatePosition(

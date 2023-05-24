@@ -9,18 +9,18 @@ export const mapIndexDHSSetName = "Index_DHS";
 
 export const appModes = {
   "test" : "HiGlass test",
-  "cd3plus" : "CD3+",
+  "cd3pos" : "CD3+",
   "hudep" : "HUDEP",
 };
 
 export const appModeLabels = {
   "test" : "test",
-  "cd3plus" : "cd3plus",
+  "cd3pos" : "cd3pos",
   "hudep" : "hudep",
 };
 
 export const appDefaultAssembly = "hg38";
-export const appDefaultMode = "cd3plus";
+export const appDefaultMode = "hudep";
 export const appMinimumTileWidth = 15000;
 export const appDefaultTileWidth = 30000;
 export const appDefaultHgViewEditable = false;
@@ -190,10 +190,10 @@ export const testHiglassPileupViewconf = {
   ]
 }
 
-export const cd3plusTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam";
-export const cd3plusTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam.bai";
+export const cd3posTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam";
+export const cd3posTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/fsv.d2.stim.chr11.bam.bai";
 
-export const cd3plusHiglassPileupViewconf = {
+export const cd3posHiglassPileupViewconf = {
   "editable": true,
   "zoomFixed" : false,
   "trackSourceServers": [
@@ -320,8 +320,8 @@ export const cd3plusHiglassPileupViewconf = {
             "uid": "FylkvVBTSumoJ959HT4-5A",
             "data": {
               "type": "bam",
-              "bamUrl": cd3plusTestBAMURL,
-              "baiUrl": cd3plusTestBAIURL,
+              "bamUrl": cd3posTestBAMURL,
+              "baiUrl": cd3posTestBAIURL,
               "chromSizesUrl": hg38ChromsizesURL,
               "options": {
                   "maxTileWidth": appDefaultTileWidth,
@@ -393,15 +393,15 @@ export const hudepHiglassPileupViewconf = {
             "position" : "top"
           },
           {
-            "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
-            "type": "bar", // "1d-heatmap", // "horizontal-line",
+            "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBaseMeanWithClipped.filtered.versionSort.bedgraph.bw",
+            "type": "bar",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
-            "tilesetUid" : "IpWzYlb8T4SDtV9R1WWTXw",
+            "tilesetUid" : "VDUE1tG2TTKw8OKAZK6HmA",
             "uid" : "bwtest-001",
             "options" : {
               "labelPosition": "hidden",
-              "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
+              "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBaseMeanWithClipped",
               "valueScaling": "linear",
               "valueScaleMin": 0,
               // "valueScaleMax": 20,
@@ -482,18 +482,18 @@ export const hudepHiglassPileupViewconf = {
             "height" : appGeneAnnotationTrackHeight,
           },
           {
-            "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
-            "type": "bar", // "1d-heatmap", // "horizontal-line",
+            "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBaseMeanWithClipped.filtered.versionSort.bedgraph.bw",
+            "type": "bar",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
-            "tilesetUid" : "Whb3mOktR7i3wVrsMeailg",
+            "tilesetUid" : "c62Pg3vKQta7eGi5k3-QHA",
             "uid" : "bwtest-002",
             "options" : {
               "labelPosition": "hidden",
-              "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBase.filtered.versionSort.bedgraph.bw",
+              "name": "HUDEP.treatment.DS182417.chr11.m6aEventsPerBaseMeanWithClipped",
               "valueScaling": "linear",
               "valueScaleMin": 0,
-              "valueScaleMax": 20,
+              // "valueScaleMax": 20,
               "lineStrokeWidth": 1,
               "lineStrokeColor": appDefaultFiberSeqReadTreatmentHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadTreatmentHexColor],

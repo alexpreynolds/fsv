@@ -386,7 +386,7 @@ class App extends Component {
     const newHgViewKey = this.state.hgViewKey + 1;
     const newMode = m;
     const currentPosition = this.state.hgViewCurrentPosition;
-    console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
+    // console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
     let newHgViewconf = {};
     switch (m) {
       case Constants.appModeLabels.test:
@@ -573,6 +573,46 @@ class App extends Component {
       </div>
       <div style={drawerItemContentStyle}>
         {modes}
+      </div>
+    </div>);
+
+    //
+    // • tag probability
+    //
+    function handleProbabilitySliderChange(value) {
+      console.log(`${value}`);
+    }
+    
+    const probabilities = {
+      '47'  : `${parseInt(0.473 * 255)}`,
+      '78'  : `${parseInt(0.787 * 255)}`,
+      '94'  : `${parseInt(0.942 * 255)}`,
+      '100' : `${parseInt(1.000 * 255)}`,
+    };
+    items.push(<div style={Object.assign({}, drawerItemGroupStyle, drawerSliderContentStyle)}>
+      <div>
+        <FaAngleDown /> probability threshold
+      </div>
+      <div style={drawerItemContentStyle}>
+        <Slider
+          range
+          disabled
+          min={Constants.appDefaultProbabilitySliderRange[0]}
+          max={Constants.appDefaultProbabilitySliderRange[1]}
+          marks={probabilities}
+          step={100*5/255}
+          allowCross={false}
+          onChange={handleProbabilitySliderChange}
+          defaultValue={Constants.appDefaultProbabilityRange}
+          className="slider-custom"
+          trackStyle={{ backgroundColor: 'darkgrey' }}
+          railStyle={{ backgroundColor: 'rgb(220,220,220)' }}
+          handleStyle={{
+            borderColor: 'darkgrey',
+            backgroundColor: 'rgb(60,60,60)',
+          }}
+          dotStyle={{ borderColor: 'rgb(220,220,220)' }}
+          activeDotStyle={{ borderColor: 'darkgrey' }} />
       </div>
     </div>);
 

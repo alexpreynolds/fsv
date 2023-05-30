@@ -328,3 +328,7 @@ body {
 .suggestion-location, .suggestion-strand {
   font-weight: 400;
 }
+
+.rc-slider-mark-text {
+  font-size: 0.6rem !important;
+}

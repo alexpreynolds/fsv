@@ -35,11 +35,15 @@ export const appChromosomeTrackHeight = 30;
 export const appCoverageTrackHeight = 20;
 export const appGeneAnnotationTrackHeight = 120;
 export const appGapTrackHeight = 2;
-export const appDefaultFiberSeqReadHexColor = "#663399";
-export const appDefaultFiberSeqReadControlHexColor = "#336699";
-export const appDefaultFiberSeqReadTreatmentHexColor = "#009966";
-export const appDefaultFiberSeqReadFoldChangeHexColor = "#996633";
-export const appDefaultFiberSeqReadFoldChangeHexColormap = ["#fde725", "#5ec962", "#21918c", "#3b528b", "#440154"];
+export const appDefaultFiberSeqReadHexColor = "#663399cc";
+export const appDefaultFiberSeqReadControlHexColor = "#336699cc";
+export const appDefaultFiberSeqReadTreatmentHexColor = "#009966cc";
+export const appDefaultFiberSeqReadFoldChangeHexColor = "#996633cc";
+export const appDefaultFiberSeqReadFoldChangeHexColormap = ["#fde725cc", "#5ec962cc", "#21918ccc", "#3b528bcc", "#440154cc"];
+export const appDefaultFiberSeqReadCpGHexColor = "#ff0000cc";
+export const appDefaultProbabilitySliderRange = [100*120/255, 100*255/255];
+export const appDefaultProbabilityRange = [100*240/255, 100*255/255];
+export const appDefaultProbabilityIntRange = [240, 255];
 
 export const assemblyChromosomes = {
   'hg19':[
@@ -282,8 +286,8 @@ export const cd3posHiglassPileupViewconf = {
               "valueScaling": "linear",
               "valueScaleMin": 0,
               // "valueScaleMax": 20,
-              "lineStrokeWidth": 1,
-              "lineStrokeColor": appDefaultFiberSeqReadHexColor,
+              // "lineStrokeWidth": 1,
+              // "lineStrokeColor": appDefaultFiberSeqReadHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadHexColor],
               "showMousePosition" : true,
               "showTooltip": true,
@@ -318,6 +322,20 @@ export const cd3posHiglassPileupViewconf = {
               ],
               "showLoadingText": false,
               "showMousePosition" : true,
+              "methylation": {
+                "hideSubstitutions": true,
+                "categories": [
+                  {"unmodifiedBase": "A", "code": "a", "strand": "+"},
+                  {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+                ],
+                "colors": [
+                  appDefaultFiberSeqReadHexColor, 
+                  appDefaultFiberSeqReadHexColor,
+                  appDefaultFiberSeqReadCpGHexColor,
+                ],
+                "categoryAbbreviations": ['m6A', '5mC'],
+                "probabilityThresholdRange": appDefaultProbabilityIntRange,
+              },
             },
             "uid": "FylkvVBTSumoJ959HT4-5A",
             "data": {
@@ -414,7 +432,20 @@ export const hudepHiglassPileupViewconf = {
                 "#808080",
                 "#DCDCDC"
               ],
-              "methylationTagColor": appDefaultFiberSeqReadControlHexColor,
+              "methylation": {
+                "hideSubstitutions": true,
+                "categories": [
+                  {"unmodifiedBase": "A", "code": "a", "strand": "+"},
+                  {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+                ],
+                "colors": [
+                  appDefaultFiberSeqReadControlHexColor, 
+                  appDefaultFiberSeqReadControlHexColor,
+                  appDefaultFiberSeqReadCpGHexColor,
+                ],
+                "categoryAbbreviations": ['m6A', '5mC'],
+                "probabilityThresholdRange": appDefaultProbabilityIntRange,
+              },
               "showLoadingText": false,
               "showMousePosition" : true,
             },
@@ -449,7 +480,21 @@ export const hudepHiglassPileupViewconf = {
                 "#808080",
                 "#DCDCDC"
               ],
-              "methylationTagColor": appDefaultFiberSeqReadTreatmentHexColor,
+              "methylation": {
+                "hideSubstitutions": true,
+                "categories": [
+                  {"unmodifiedBase": "A", "code": "a", "strand": "+"},
+                  {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+                  {"unmodifiedBase": "C", "code": "m", "strand": "+"},
+                ],
+                "colors": [
+                  appDefaultFiberSeqReadTreatmentHexColor, 
+                  appDefaultFiberSeqReadTreatmentHexColor,
+                  appDefaultFiberSeqReadCpGHexColor,
+                ],
+                "categoryAbbreviations": ['m6A', '5mC'],
+                "probabilityThresholdRange": appDefaultProbabilityIntRange,
+              },
               "showLoadingText": false,
               "showMousePosition" : true,
             },
@@ -504,8 +549,8 @@ export const hudepHiglassPileupViewconf = {
               "valueScaling": "linear",
               "valueScaleMin": 0,
               // "valueScaleMax": 20,
-              "lineStrokeWidth": 1,
-              "lineStrokeColor": appDefaultFiberSeqReadControlHexColor,
+              // "lineStrokeWidth": 1,
+              // "lineStrokeColor": appDefaultFiberSeqReadControlHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadControlHexColor],
               "showMousePosition" : true,
               "showTooltip": true,
@@ -525,8 +570,8 @@ export const hudepHiglassPileupViewconf = {
               "valueScaling": "linear",
               "valueScaleMin": 0,
               // "valueScaleMax": 20,
-              "lineStrokeWidth": 1,
-              "lineStrokeColor": appDefaultFiberSeqReadTreatmentHexColor,
+              // "lineStrokeWidth": 1,
+              // "lineStrokeColor": appDefaultFiberSeqReadTreatmentHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadTreatmentHexColor],
               "showMousePosition" : true,
               "showTooltip": true,

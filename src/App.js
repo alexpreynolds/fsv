@@ -153,7 +153,7 @@ class App extends Component {
         newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGapTrackHeight - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
-        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight - 2 * (Constants.appCoverageTrackHeight + Constants.appGapTrackHeight);
+        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight - 3 * (Constants.appCoverageTrackHeight + Constants.appGapTrackHeight);
         const perPileupHeight = parseInt(totalAvailablePileupHeight / 2);
         newPileupHeight = perPileupHeight;
         break;

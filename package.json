@@ -22,6 +22,9 @@
     "reactstrap": "^9.1.9",
     "web-vitals": "^2.1.4"
   },
+  "dependenciesComments": {
+    "higlass-pileup": "Can be represented either as: git+https://alexpreynolds@github.com/alexpreynolds/higlass-pileup.git#methylation or file:../higlass-pileup for local development purposes"
+  },
   "scripts": {
     "clean": "rm -rf node_modules && rm -f package-lock.json && rm -rf dist && rm -rf build",
     "start": "react-scripts start",

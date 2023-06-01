@@ -125,6 +125,11 @@ body {
 .higlass {
   padding-right: 0px !important;
   padding-left: 0px !important;
+  /* padding-bottom: 10px !important; */
+}
+
+.react-grid-layout {
+  height: calc(100vh) !important;
 }
 
 /* UX */
@@ -287,9 +292,9 @@ body {
   border-top-width: 1px;
   border-radius: 3px;
   list-style: none;
-  margin-top: 0;
   overflow-y: auto;
   padding-left: 0;
+  margin-top: 3px;
   margin-left: auto;
   margin-right: auto;
   background-color: white;

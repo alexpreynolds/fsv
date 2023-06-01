@@ -39,11 +39,37 @@ export const appDefaultFiberSeqReadHexColor = "#663399cc";
 export const appDefaultFiberSeqReadControlHexColor = "#336699cc";
 export const appDefaultFiberSeqReadTreatmentHexColor = "#009966cc";
 export const appDefaultFiberSeqReadFoldChangeHexColor = "#996633cc";
-export const appDefaultFiberSeqReadFoldChangeHexColormap = ["#fde725cc", "#5ec962cc", "#21918ccc", "#3b528bcc", "#440154cc"];
+export const appDefaultFiberSeqReadFoldChangeHexColormap = ["#fde725ff", "#5ec962ff", "#21918cff", "#3b528bff", "#440154ff"];
 export const appDefaultFiberSeqReadCpGHexColor = "#ff0000cc";
 export const appDefaultProbabilitySliderRange = [100*120/255, 100*255/255];
 export const appDefaultProbabilityRange = [100*240/255, 100*255/255];
-export const appDefaultProbabilityIntRange = [240, 255];
+export const appDefaultProbabilityThresholdRange = [240, 255];
+export const appDefaultHgViewM6AEventViewable = true;
+export const appDefaultM6AEventCategories = [
+  {"unmodifiedBase": "A", "code": "a", "strand": "+"},
+  {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+];
+export const appDefaultM6AEventColors = [
+  appDefaultFiberSeqReadHexColor, 
+  appDefaultFiberSeqReadHexColor,
+];
+export const appDefaultM6AControlEventColors = [
+  appDefaultFiberSeqReadControlHexColor, 
+  appDefaultFiberSeqReadControlHexColor,
+];
+export const appDefaultM6ATreatmentEventColors = [
+  appDefaultFiberSeqReadTreatmentHexColor, 
+  appDefaultFiberSeqReadTreatmentHexColor,
+];
+export const appDefaultM6AEventCategoryAbbreviations = ['m6A'];
+export const appDefaultHgView5mCEventViewable = true;
+export const appDefault5mCEventCategories = [
+  {"unmodifiedBase": "C", "code": "m", "strand": "+"},
+];
+export const appDefault5mCEventColors = [
+  appDefaultFiberSeqReadCpGHexColor,
+];
+export const appDefault5mCEventCategoryAbbreviations = ['5mC'];
 
 export const assemblyChromosomes = {
   'hg19':[
@@ -323,10 +349,12 @@ export const cd3posHiglassPileupViewconf = {
               "showLoadingText": false,
               "showMousePosition" : true,
               "methylation": {
+                "set": "",
                 "hideSubstitutions": true,
                 "categories": [
                   {"unmodifiedBase": "A", "code": "a", "strand": "+"},
                   {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+                  {"unmodifiedBase": "C", "code": "m", "strand": "+"},
                 ],
                 "colors": [
                   appDefaultFiberSeqReadHexColor, 
@@ -334,7 +362,7 @@ export const cd3posHiglassPileupViewconf = {
                   appDefaultFiberSeqReadCpGHexColor,
                 ],
                 "categoryAbbreviations": ['m6A', '5mC'],
-                "probabilityThresholdRange": appDefaultProbabilityIntRange,
+                "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
               },
             },
             "uid": "FylkvVBTSumoJ959HT4-5A",
@@ -433,10 +461,12 @@ export const hudepHiglassPileupViewconf = {
                 "#DCDCDC"
               ],
               "methylation": {
+                "set": "control", 
                 "hideSubstitutions": true,
                 "categories": [
                   {"unmodifiedBase": "A", "code": "a", "strand": "+"},
                   {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+                  {"unmodifiedBase": "C", "code": "m", "strand": "+"},
                 ],
                 "colors": [
                   appDefaultFiberSeqReadControlHexColor, 
@@ -444,7 +474,7 @@ export const hudepHiglassPileupViewconf = {
                   appDefaultFiberSeqReadCpGHexColor,
                 ],
                 "categoryAbbreviations": ['m6A', '5mC'],
-                "probabilityThresholdRange": appDefaultProbabilityIntRange,
+                "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
               },
               "showLoadingText": false,
               "showMousePosition" : true,
@@ -481,6 +511,7 @@ export const hudepHiglassPileupViewconf = {
                 "#DCDCDC"
               ],
               "methylation": {
+                "set": "treatment",
                 "hideSubstitutions": true,
                 "categories": [
                   {"unmodifiedBase": "A", "code": "a", "strand": "+"},
@@ -493,7 +524,7 @@ export const hudepHiglassPileupViewconf = {
                   appDefaultFiberSeqReadCpGHexColor,
                 ],
                 "categoryAbbreviations": ['m6A', '5mC'],
-                "probabilityThresholdRange": appDefaultProbabilityIntRange,
+                "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
               },
               "showLoadingText": false,
               "showMousePosition" : true,
@@ -602,6 +633,12 @@ export const hudepHiglassPileupViewconf = {
               "showTooltip": true,
               "minHeight": appCoverageTrackHeight,
             },
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
           },
         ]
       },

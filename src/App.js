@@ -34,14 +34,13 @@ import * as Constants from "./Constants.js";
 
 import "./App.css";
 
-function debounce(fn, ms) {
-  let timer;
-  return _ => {
-    clearTimeout(timer);
-    timer = setTimeout(_ => {
-      timer = null;
-      fn.apply(this, arguments);
-    }, ms);
+const debounce = (callback, wait) => {
+  let timeoutId = null;
+  return (...args) => {
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => {
+      callback.apply(null, args);
+    }, wait);
   };
 }
 
@@ -74,11 +73,15 @@ class App extends Component {
       hgViewTranscriptsDirectional: Constants.appDefaultHgViewTranscriptsDirectional,
       hgViewTranscriptsDirectionalEnabled: true,
       hgViewTileWidth: Constants.appDefaultTileWidth,
+      hgViewProbabilityThresholdRange: Constants.appDefaultProbabilityThresholdRange,
+      hgViewM6AEventViewable: Constants.appDefaultHgViewM6AEventViewable,
+      hgView5mCEventViewable: Constants.appDefaultHgView5mCEventViewable,
+      hgView5mCEventViewableToggleEnabled: true,
       hgViewCurrentPosition: null,
       chromInfo: null,
       coverEnabled: true,
-      coverVisible: true,
-      fetchingTilesetInfo: true,
+      coverVisible: {},
+      fetchingTilesetInfo: {},
       hamburgerClosedState: true,
     };
     this.hgViewRef = React.createRef();
@@ -103,6 +106,8 @@ class App extends Component {
         throw Error("Unknown application mode; could not set up viewconf in constructor");
     }
 
+    this.pileupTrackStatusMonitors = {};
+
     this.state.hgViewconf.editable = this.state.hgViewEditable;
     this.state.hgViewconf.views[0].tracks.top.forEach((track, i) => {
       switch (track.type) {
@@ -111,14 +116,45 @@ class App extends Component {
           break;
         case "pileup":
           track.data.options.maxTileWidth = this.state.hgViewTileWidth;
+          const monitor = new BroadcastChannel(`pileup-track-${track.uid}`);
+          monitor.onmessage = (event) => this.handlePileupTrackStatusChange(event.data, track.uid);
+          this.pileupTrackStatusMonitors[track.uid] = monitor;
+          this.state.coverVisible[track.uid] = true;
+          this.state.fetchingTilesetInfo[track.uid] = true;
+          if (track.options.methylation) {
+            track.options.methylation.probabilityThresholdRange = this.state.hgViewProbabilityThresholdRange;
+            let newMethylationEventCategories = [];
+            let newMethylationEventColors = [];
+            let newMethylationEventCategoryAbbreviations = [];
+            if (this.state.hgViewM6AEventViewable) {
+              newMethylationEventCategories = [...newMethylationEventCategories, ...Constants.appDefaultM6AEventCategories];
+              newMethylationEventCategoryAbbreviations = [...newMethylationEventCategoryAbbreviations, ...Constants.appDefaultM6AEventCategoryAbbreviations];
+              switch (track.options.methylation.set) {
+                case "control":
+                  newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6AControlEventColors];
+                  break;
+                case "treatment":
+                  newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6ATreatmentEventColors];
+                  break;
+                default:
+                  newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6AEventColors];
+                  break;
+              }
+            }
+            if (this.state.hgView5mCEventViewable) {
+              newMethylationEventCategories = [...newMethylationEventCategories, ...Constants.appDefault5mCEventCategories];
+              newMethylationEventCategoryAbbreviations = [...newMethylationEventCategoryAbbreviations, ...Constants.appDefault5mCEventCategoryAbbreviations];
+              newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefault5mCEventColors];
+            }
+            track.options.methylation.categories = newMethylationEventCategories;
+            track.options.methylation.colors = newMethylationEventColors;
+            track.options.methylation.categoryAbbreviations = newMethylationEventCategoryAbbreviations;
+          }
           break;
         default:
           break;  
       }
     });
-
-    this.pileupTrackStatusMonitor = new BroadcastChannel("pileup-track-status");
-    this.pileupTrackStatusMonitor.onmessage = (event) => this.handlePileupTrackStatusChange(event.data);
   }
 
   componentDidMount() {
@@ -132,13 +168,14 @@ class App extends Component {
       if ((this.state.mode === Constants.appModeLabels.cd3pos) || (this.state.mode === Constants.appModeLabels.hudep)) {
         setTimeout(() => {
           this.zoomToChr11HBG2();
-        }, 100); 
+        }, 250); 
       }
     }, 100);
   }
 
   componentWillUnmount() {
-    this.pileupTrackStatusMonitor.close();
+    // this.pileupTrackStatusMonitor.close();
+    Object.keys(this.pileupTrackStatusMonitors).forEach(k => this.pileupTrackStatusMonitors[k].close());
     window.removeEventListener('resize', this.handleResize);
   }
 
@@ -153,7 +190,7 @@ class App extends Component {
         newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGapTrackHeight - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
-        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight - 3 * (Constants.appCoverageTrackHeight + Constants.appGapTrackHeight);
+        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight - 3 * Constants.appCoverageTrackHeight - 2 * Constants.appGapTrackHeight;
         const perPileupHeight = parseInt(totalAvailablePileupHeight / 2);
         newPileupHeight = perPileupHeight;
         break;
@@ -178,6 +215,50 @@ class App extends Component {
     });
   }, 100);
 
+  handlePileupTrackStatusChange = (data, uid) => {
+    if (typeof data === 'undefined' || !uid) return;
+    // console.log(`handlePileupTrackStatusChange | ${JSON.stringify(data)} | ${uid}`);
+    let newCoverVisible = this.state.coverVisible;
+    let newFetchingTilesetInfo = this.state.fetchingTilesetInfo;
+    switch (data.state) {
+      case "loading":
+        newCoverVisible[uid] = true;
+        newFetchingTilesetInfo[uid] = true;
+        break;
+      case "update_start":
+        newCoverVisible[uid] = true;
+        // newCoverVisible[uid] = this.state.fetchingTilesetInfo[uid];
+        break;
+      case "update_end":
+        newCoverVisible[uid] = this.state.fetchingTilesetInfo[uid];
+        newFetchingTilesetInfo[uid] = false;
+        break;
+      case "fetching_tileset_info":
+        newCoverVisible[uid] = true;
+        newFetchingTilesetInfo[uid] = true;
+        break;
+      case "fetching":
+        newCoverVisible[uid] = true;
+        newFetchingTilesetInfo[uid] = false;
+        break;
+      case "rendering":
+        newCoverVisible[uid] = true; // this.state.fetchingTilesetInfo[uid];
+        newFetchingTilesetInfo[uid] = false;
+        break;
+      default:
+        break;
+    }
+    // console.log(`          new covervisible flags:        ${JSON.stringify(newCoverVisible)}`);
+    // console.log(`     some new covervisible flags true?:  ${Object.values(newCoverVisible).some(e => e === true)}`);
+    // console.log(`      all new covervisible flags false?: ${Object.values(newCoverVisible).every(e => e === false)}`);
+    this.setState({
+      coverVisible: newCoverVisible,
+      fetchingTilesetInfo: newFetchingTilesetInfo,
+    }, () => {
+      this.handleResize();
+    });
+  };
+
   isAutocompleteEnabled = () => (this.state.mode !== Constants.appModeLabels.test);
 
   updateViewerLocation = (event) => {
@@ -201,47 +282,6 @@ class App extends Component {
     };
     this.setState({
       hgViewCurrentPosition: newHgViewCurrentPosition,
-    });
-  }
-
-  handlePileupTrackStatusChange = (data) => {
-    // console.log(`handlePileupTrackStatusChange | ${JSON.stringify(data)}`);
-    let newCoverVisible = true;
-    let newFetchingTilesetInfo = this.state.fetchingTilesetInfo;
-    switch (data.state) {
-      case "loading":
-        newCoverVisible = true;
-        newFetchingTilesetInfo = true;
-        break;
-      case "update_start":
-        newCoverVisible = true;
-        newCoverVisible = (this.state.fetchingTilesetInfo);
-        break;
-      case "update_end":
-        newCoverVisible = (this.state.fetchingTilesetInfo);
-        newFetchingTilesetInfo = false;
-        break;
-      case "fetching_tileset_info":
-        newCoverVisible = true;
-        newFetchingTilesetInfo = true;
-        break;
-      case "fetching":
-        newCoverVisible = true;
-        newFetchingTilesetInfo = false;
-        break;
-      case "rendering":
-        newCoverVisible = (this.state.fetchingTilesetInfo);
-        newFetchingTilesetInfo = false;
-        break;
-      default:
-        break;
-    }
-    this.setState({
-      coverVisible: newCoverVisible,
-      fetchingTilesetInfo: newFetchingTilesetInfo,
-    }, () => {
-      this.handleResize();
-      // console.log(`coverVisible ${this.state.coverVisible} | fetchingTilesetInfo ${this.state.fetchingTilesetInfo}`);
     });
   }
 
@@ -284,43 +324,61 @@ class App extends Component {
     });
   }
 
-  toggleMode = (e) => {
-    if (!this.state.modeToggleEnabled) return;
-    const currentPosition = this.state.hgViewCurrentPosition;
-    console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
-    const newMode = (this.state.mode === Constants.appModeLabels.test) ? Constants.appModeLabels.cd3pos : Constants.appModeLabels.test;
-    const newHgViewconf = (this.state.mode === Constants.appModeLabels.test) ? Constants.cd3posHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
-    // console.log(`toggleMode | ${this.state.mode} -> ${newMode}`);
-    this.setState({
-      mode: newMode,
-      hgViewconf: newHgViewconf,
-    }, () => {
-      this.hgViewRef.api.on("location", (event) => { 
-        this.updateViewerLocation(event);
-      });
-      // this.updateChromosomeInfoObject((this.state.mode === Constants.appModeLabels.cd3pos) ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
-      switch (this.state.mode) {
-        case Constants.appModeLabels.test:
-          break;
-        case Constants.appModeLabels.cd3pos:
-        case Constants.appModeLabels.hudep:
-          // this.zoomToChr11HBG2();
-          setTimeout(() => {
-            this.hgViewUpdatePosition(
-              this.state.assembly,
-              currentPosition.left.chrom, 
-              currentPosition.left.start, 
-              currentPosition.right.stop, 
-              currentPosition.right.chrom, 
-              currentPosition.left.start, 
-              currentPosition.right.stop)
-          }, 100);
-          break;
-        default:
-          throw new Error("Unknown mode passed to switchToMode fn");
-      }
-    });
-  }
+  // toggleMode = (e) => {
+  //   if (!this.state.modeToggleEnabled) return;
+  //   const currentPosition = this.state.hgViewCurrentPosition;
+  //   console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
+  //   const newMode = (this.state.mode === Constants.appModeLabels.test) ? Constants.appModeLabels.cd3pos : Constants.appModeLabels.test;
+  //   const newHgViewconf = (this.state.mode === Constants.appModeLabels.test) ? Constants.cd3posHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
+  //   // console.log(`toggleMode | ${this.state.mode} -> ${newMode}`);
+  //   Object.keys(this.pileupTrackStatusMonitors).forEach(k => this.pileupTrackStatusMonitors[k].close());
+  //   const newCoverVisible = {};
+  //   const newFetchingTilesetInfo = {};
+  //   newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+  //     switch (track.type) {
+  //       case "pileup":
+  //         const monitor = new BroadcastChannel(`pileup-track-${track.uid}`);
+  //         monitor.onmessage = (event) => this.handlePileupTrackStatusChange(event.data, track.uid);
+  //         this.pileupTrackStatusMonitors[track.uid] = monitor;
+  //         newCoverVisible[track.uid] = true;
+  //         newFetchingTilesetInfo[track.uid] = true;
+  //         break;
+  //       default:
+  //         break;  
+  //     }
+  //   });
+  //   this.setState({
+  //     mode: newMode,
+  //     hgViewconf: newHgViewconf,
+  //     coverVisible: newCoverVisible,
+  //     fetchingTilesetInfo: newFetchingTilesetInfo,
+  //   }, () => {
+  //     this.hgViewRef.api.on("location", (event) => { 
+  //       this.updateViewerLocation(event);
+  //     });
+  //     // this.updateChromosomeInfoObject((this.state.mode === Constants.appModeLabels.cd3pos) ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
+  //     switch (this.state.mode) {
+  //       case Constants.appModeLabels.test:
+  //         break;
+  //       case Constants.appModeLabels.cd3pos:
+  //       case Constants.appModeLabels.hudep:
+  //         // this.zoomToChr11HBG2();
+  //         setTimeout(() => {
+  //           this.hgViewUpdatePosition(
+  //             this.state.assembly,
+  //             currentPosition.left.chrom, 
+  //             currentPosition.left.start, 
+  //             currentPosition.right.stop, 
+  //             currentPosition.right.chrom, 
+  //             currentPosition.left.start, 
+  //             currentPosition.right.stop)
+  //         }, 100);
+  //         break;
+  //       default:
+  //         throw new Error("Unknown mode passed to switchToMode fn");
+  //     }
+  //   });
+  // }
 
   toggleHgViewEditable = (e) => {
     if (!this.state.hgViewEditableToggleEnabled) return;
@@ -380,6 +438,65 @@ class App extends Component {
     });
   }
 
+  toggleHgView5mCEventViewable = (e) => {
+    if (!this.state.hgView5mCEventViewableToggleEnabled) return;
+    const newHgViewKey = this.state.hgViewKey + 1;
+    const newHgView5mCEventViewable = !this.state.hgView5mCEventViewable;
+    const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
+    newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+      if (track.type === "pileup") {
+        if (track.options.methylation) {
+          let newMethylationEventCategories = [];
+          let newMethylationEventColors = [];
+          let newMethylationEventCategoryAbbreviations = [];
+          if (this.state.hgViewM6AEventViewable) {
+            newMethylationEventCategories = [...newMethylationEventCategories, ...Constants.appDefaultM6AEventCategories];
+            newMethylationEventCategoryAbbreviations = [...newMethylationEventCategoryAbbreviations, ...Constants.appDefaultM6AEventCategoryAbbreviations];
+            switch (track.options.methylation.set) {
+              case "control":
+                newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6AControlEventColors];
+                break;
+              case "treatment":
+                newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6ATreatmentEventColors];
+                break;
+              default:
+                newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6AEventColors];
+                break;
+            }
+          }
+          if (newHgView5mCEventViewable) {
+            newMethylationEventCategories = [...newMethylationEventCategories, ...Constants.appDefault5mCEventCategories];
+            newMethylationEventCategoryAbbreviations = [...newMethylationEventCategoryAbbreviations, ...Constants.appDefault5mCEventCategoryAbbreviations];
+            newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefault5mCEventColors];
+          }
+          track.options.methylation.categories = newMethylationEventCategories;
+          track.options.methylation.colors = newMethylationEventColors;
+          track.options.methylation.categoryAbbreviations = newMethylationEventCategoryAbbreviations;
+        }
+      }
+    });
+    this.setState({
+      hgViewKey: newHgViewKey,
+      hgView5mCEventViewable: newHgView5mCEventViewable,
+      hgViewconf: newHgViewconf,
+    }, () => {
+      const currentPosition = this.state.hgViewCurrentPosition;
+      this.hgViewRef.api.on("location", (event) => { 
+        this.updateViewerLocation(event);
+      });
+      setTimeout(() => {
+        this.hgViewUpdatePosition(
+          this.state.assembly,
+          currentPosition.left.chrom, 
+          currentPosition.left.start, 
+          currentPosition.right.stop, 
+          currentPosition.right.chrom, 
+          currentPosition.left.start, 
+          currentPosition.right.stop)
+      }, 100);
+    });
+  }
+
   switchToMode = (m) => {
     if (m === this.state.mode) return;
     // console.log(`switchToMode m ${JSON.stringify(m)}`);
@@ -401,6 +518,9 @@ class App extends Component {
       default:
         throw new Error("Unknown mode passed to switchToMode fn");
     }
+    Object.keys(this.pileupTrackStatusMonitors).forEach(k => this.pileupTrackStatusMonitors[k].close());
+    const newCoverVisible = {};
+    const newFetchingTilesetInfo = {};
     newHgViewconf.views[0].tracks.top.forEach((track, i) => {
       switch (track.type) {
         case "horizontal-transcripts":
@@ -408,6 +528,40 @@ class App extends Component {
           break;
         case "pileup":
           track.data.options.maxTileWidth = this.state.hgViewTileWidth;
+          const monitor = new BroadcastChannel(`pileup-track-${track.uid}`);
+          monitor.onmessage = (event) => this.handlePileupTrackStatusChange(event.data, track.uid);
+          this.pileupTrackStatusMonitors[track.uid] = monitor;
+          newCoverVisible[track.uid] = true;
+          newFetchingTilesetInfo[track.uid] = true;
+          if (track.options.methylation) {
+            track.options.methylation.probabilityThresholdRange = this.state.hgViewProbabilityThresholdRange;
+            let newMethylationEventCategories = [];
+            let newMethylationEventColors = [];
+            let newMethylationEventCategoryAbbreviations = [];
+            if (this.state.hgViewM6AEventViewable) {
+              newMethylationEventCategories = [...newMethylationEventCategories, ...Constants.appDefaultM6AEventCategories];
+              newMethylationEventCategoryAbbreviations = [...newMethylationEventCategoryAbbreviations, ...Constants.appDefaultM6AEventCategoryAbbreviations];
+              switch (track.options.methylation.set) {
+                case "control":
+                  newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6AControlEventColors];
+                  break;
+                case "treatment":
+                  newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6ATreatmentEventColors];
+                  break;
+                default:
+                  newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefaultM6AEventColors];
+                  break;
+              }
+            }
+            if (this.state.hgView5mCEventViewable) {
+              newMethylationEventCategories = [...newMethylationEventCategories, ...Constants.appDefault5mCEventCategories];
+              newMethylationEventCategoryAbbreviations = [...newMethylationEventCategoryAbbreviations, ...Constants.appDefault5mCEventCategoryAbbreviations];
+              newMethylationEventColors = [...newMethylationEventColors, ...Constants.appDefault5mCEventColors];
+            }
+            track.options.methylation.categories = newMethylationEventCategories;
+            track.options.methylation.colors = newMethylationEventColors;
+            track.options.methylation.categoryAbbreviations = newMethylationEventCategoryAbbreviations;
+          }
           break;
         default:
           break;
@@ -419,6 +573,8 @@ class App extends Component {
       mode: newMode,
       hgViewKey: newHgViewKey,
       hgViewconf: newHgViewconf,
+      coverVisible: newCoverVisible,
+      fetchingTilesetInfo: newFetchingTilesetInfo,
     }, () => {
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
@@ -510,11 +666,11 @@ class App extends Component {
     this.hgViewUpdatePosition(
       this.state.assembly,
       'chr11',
-      5245000,
-      5265000,
+      5254000,
+      5257000,
       'chr11',
-      5245000,
-      5265000,
+      5254000,
+      5257000,
     );  
   }
 
@@ -522,6 +678,9 @@ class App extends Component {
     const self = this;
     const drawerItemGroupStyle = {
       paddingBottom: "10px",
+    };
+    const drawerItemGroupHeaderStyle = {
+      fontWeight: '500',
     };
     const drawerItemContentStyle = {
       width: 'calc(100% - 30px)',
@@ -544,6 +703,7 @@ class App extends Component {
     const drawerSliderContentStyle = {
       marginBottom: '10px',
     };
+    
     const items = [];
 
     //
@@ -568,7 +728,7 @@ class App extends Component {
     });
     // console.log(`${JSON.stringify(modes)}`);
     items.push(<div style={drawerItemGroupStyle}>
-      <div>
+      <div style={drawerItemGroupHeaderStyle}>
         <FaAngleDown /> mode
       </div>
       <div style={drawerItemContentStyle}>
@@ -579,10 +739,50 @@ class App extends Component {
     //
     // • tag probability
     //
-    function handleProbabilitySliderChange(value) {
-      console.log(`${value}`);
-    }
-    
+    const handleProbabilitySliderChange = debounce((value) => {
+      const newHgViewKey = this.state.hgViewKey + 1;
+      const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
+      const newProbabilityThresholdRange = value.toString().split(',').map(d => parseInt(d * 255 / 100));
+      const currentPosition = this.state.hgViewCurrentPosition;
+      // console.log(`${value} -> ${newProbabilityThresholdRange}`);
+      newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+        switch (track.type) {
+          case "pileup":
+            track.options.methylation.probabilityThresholdRange = newProbabilityThresholdRange;
+            break;
+          default:
+            break;
+        }
+      });
+      this.setState({
+        hgViewKey: newHgViewKey,
+        hgViewconf: newHgViewconf,
+        hgViewProbabilityThresholdRange: newProbabilityThresholdRange,
+      }, () => {
+        this.hgViewRef.api.on("location", (event) => { 
+          this.updateViewerLocation(event);
+        });
+        switch (this.state.mode) {
+          case Constants.appModeLabels.test:
+            break;
+          case Constants.appModeLabels.cd3pos:
+          case Constants.appModeLabels.hudep:
+            setTimeout(() => {
+              this.hgViewUpdatePosition(
+                this.state.assembly,
+                currentPosition.left.chrom, 
+                currentPosition.left.start, 
+                currentPosition.right.stop, 
+                currentPosition.right.chrom, 
+                currentPosition.left.start, 
+                currentPosition.right.stop)
+            }, 100);
+            break;
+          default:
+            throw new Error("Unknown mode passed to switchToMode fn");
+        }
+      });
+    }, 500);
     const probabilities = {
       '47'  : `${parseInt(0.473 * 255)}`,
       '78'  : `${parseInt(0.787 * 255)}`,
@@ -590,13 +790,12 @@ class App extends Component {
       '100' : `${parseInt(1.000 * 255)}`,
     };
     items.push(<div style={Object.assign({}, drawerItemGroupStyle, drawerSliderContentStyle)}>
-      <div>
+      <div style={drawerItemGroupHeaderStyle}>
         <FaAngleDown /> probability threshold
       </div>
       <div style={drawerItemContentStyle}>
         <Slider
           range
-          disabled
           min={Constants.appDefaultProbabilitySliderRange[0]}
           max={Constants.appDefaultProbabilitySliderRange[1]}
           marks={probabilities}
@@ -681,7 +880,7 @@ class App extends Component {
     const defaultTileWidth = parseInt(tileWidthsToKeys[Constants.appDefaultTileWidth]);
     // console.log(`${minimumTileWidth} | ${defaultTileWidth}`);
     items.push(<div style={Object.assign({}, drawerItemGroupStyle, drawerSliderContentStyle)}>
-      <div>
+      <div style={drawerItemGroupHeaderStyle}>
         <FaAngleDown /> tile width
       </div>
       <div style={drawerItemContentStyle}>
@@ -706,8 +905,21 @@ class App extends Component {
     // • options
     //
     items.push(<div style={drawerItemGroupStyle}>
-      <div>
+      <div style={drawerItemGroupHeaderStyle}>
         <FaAngleDown /> options
+      </div>
+      <div style={Object.assign({}, drawerItemContentStyle, { display: "flex" })}>
+        <div className={(this.state.hgView5mCEventViewable) ? "flag-enabled" : "flag-disabled"}>
+          CpG enabled
+        </div>
+        &nbsp;&nbsp;
+        <FaToggleOn
+          onClick={(e) => this.toggleHgView5mCEventViewable(e)}
+          className={(this.state.hgView5mCEventViewable) ? "fa-toggle fa-toggle-on" : "fa-toggle fa-toggle-off"} />
+        &nbsp;&nbsp;
+        <div className={(!this.state.hgView5mCEventViewable) ? "flag-enabled" : "flag-disabled"}>
+          disabled
+        </div>
       </div>
       <div style={Object.assign({}, drawerItemContentStyle, { display: "flex" })}>
         <div className={(this.state.hgViewTranscriptsDirectional) ? "flag-enabled" : "flag-disabled"}>
@@ -826,7 +1038,7 @@ class App extends Component {
               { 
                 (!this.state.coverEnabled) 
                   ? <div /> 
-                  : (this.state.coverVisible) 
+                  : (Object.values(this.state.coverVisible).some(e => e === true)) 
                     ? <div className="cover cover-visible">
                         <div class="loading" />
                       </div> 

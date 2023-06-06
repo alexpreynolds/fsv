@@ -10,6 +10,7 @@
     "bootstrap": "^5.2.3",
     "higlass": "1.12.2",
     "higlass-pileup": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-pileup.git#methylation",
+    "higlass-sequence": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-sequence.git#methylation",
     "higlass-transcripts": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-transcripts.git#methylation",
     "prop-types": "^15.8.1",
     "rc-slider": "^10.1.1",

@@ -15,8 +15,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "higlass-pileup/dist/higlass-pileup.js";
 
 // higlass-transcripts
-// cf. https://github.com/higlass/higlass-transcripts
+// ref. https://github.com/higlass/higlass-transcripts
 import "higlass-transcripts/dist/higlass-transcripts.js";
+
+// higlass-sequence
+// ref. https://github.com/higlass/higlass-sequence
+import "higlass-sequence/dist/higlass-sequence.js";
 
 import { FaBars, FaTimes, FaAngleDown, FaRegCircle, FaRegDotCircle, FaAngleRight, FaToggleOn } from 'react-icons/fa';
 
@@ -102,6 +106,9 @@ class App extends Component {
       case "hudep":
         this.state.hgViewconf = Constants.hudepHiglassPileupViewconf;
         break;
+      case "hudepTest":
+        this.state.hgViewconf = Constants.hudepTestHiglassPileupViewconf;
+        break;
       default:
         throw Error("Unknown application mode; could not set up viewconf in constructor");
     }
@@ -149,6 +156,7 @@ class App extends Component {
             track.options.methylation.categories = newMethylationEventCategories;
             track.options.methylation.colors = newMethylationEventColors;
             track.options.methylation.categoryAbbreviations = newMethylationEventCategoryAbbreviations;
+            // console.log(`track.options.methylation ${JSON.stringify(track.options.methylation)}`);
           }
           break;
         default:
@@ -165,9 +173,10 @@ class App extends Component {
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
       });
-      if ((this.state.mode === Constants.appModeLabels.cd3pos) || (this.state.mode === Constants.appModeLabels.hudep)) {
+      if ((this.state.mode === Constants.appModeLabels.cd3pos) || (this.state.mode === Constants.appModeLabels.hudep) || (this.state.mode === Constants.appModeLabels.hudepTest)) {
         setTimeout(() => {
           this.zoomToChr11HBG2();
+          // this.zoomToChr11TestRegion();
         }, 250); 
       }
     }, 100);
@@ -184,15 +193,38 @@ class App extends Component {
     let newPileupHeight = 0;
     switch (this.state.mode) {
       case Constants.appModeLabels.test:
-        newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight;
+        newPileupHeight = parseInt(window.innerHeight)
+          - Constants.appHeaderHeight;
         break;
       case Constants.appModeLabels.cd3pos:
-        newPileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appCoverageTrackHeight - Constants.appGapTrackHeight - Constants.appGeneAnnotationTrackHeight;
+        newPileupHeight = parseInt(window.innerHeight)
+          - Constants.appHeaderHeight
+          - Constants.appChromosomeTrackHeight
+          - Constants.appSequenceTrackHeight
+          - Constants.appCoverageTrackHeight
+          - Constants.appGapTrackHeight
+          - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
-        const totalAvailablePileupHeight = parseInt(window.innerHeight) - Constants.appHeaderHeight - Constants.appChromosomeTrackHeight - Constants.appGeneAnnotationTrackHeight - 3 * Constants.appCoverageTrackHeight - 2 * Constants.appGapTrackHeight;
-        const perPileupHeight = parseInt(totalAvailablePileupHeight / 2);
+        const totalAvailableHudepPileupHeight = parseInt(window.innerHeight)
+          - Constants.appHeaderHeight
+          - Constants.appChromosomeTrackHeight
+          - Constants.appSequenceTrackHeight
+          - Constants.appGeneAnnotationTrackHeight
+          - 3 * Constants.appCoverageTrackHeight
+          - 2 * Constants.appGapTrackHeight;
+        const perPileupHeight = parseInt(totalAvailableHudepPileupHeight / 2);
         newPileupHeight = perPileupHeight;
+        break;
+      case Constants.appModeLabels.hudepTest:
+        const totalAvailableHudepTestPileupHeight = parseInt(window.innerHeight)
+          - Constants.appHeaderHeight
+          - Constants.appChromosomeTrackHeight
+          - Constants.appSequenceTrackHeight
+          - Constants.appGeneAnnotationTrackHeight
+          - Constants.appCoverageTrackHeight
+          - Constants.appGapTrackHeight;
+        newPileupHeight = totalAvailableHudepTestPileupHeight;
         break;
       default:
         throw new Error("Unknown mode passed to handleResize fn");
@@ -515,6 +547,9 @@ class App extends Component {
       case Constants.appModeLabels.hudep:
         newHgViewconf = Constants.hudepHiglassPileupViewconf;
         break;
+      case Constants.appModeLabels.hudepTest:
+        newHgViewconf = Constants.hudepTestHiglassPileupViewconf;
+        break;
       default:
         throw new Error("Unknown mode passed to switchToMode fn");
     }
@@ -584,6 +619,7 @@ class App extends Component {
           break;
         case Constants.appModeLabels.cd3pos:
         case Constants.appModeLabels.hudep:
+        case Constants.appModeLabels.hudepTest:
           setTimeout(() => {
             this.hgViewUpdatePosition(
               this.state.assembly,
@@ -671,6 +707,18 @@ class App extends Component {
       'chr11',
       5254000,
       5257000,
+    );  
+  }
+
+  zoomToChr11TestRegion = () => {
+    this.hgViewUpdatePosition(
+      this.state.assembly,
+      'chr11',
+      60100,
+      60130,
+      'chr11',
+      60100,
+      60130,
     );  
   }
 
@@ -767,6 +815,7 @@ class App extends Component {
             break;
           case Constants.appModeLabels.cd3pos:
           case Constants.appModeLabels.hudep:
+          case Constants.appModeLabels.hudepTest:
             setTimeout(() => {
               this.hgViewUpdatePosition(
                 this.state.assembly,

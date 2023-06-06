@@ -11,12 +11,14 @@ export const appModes = {
   "test" : "HiGlass test",
   "cd3pos" : "CD3+",
   "hudep" : "HUDEP",
+  // "hudepTest" : "HUDEP (control test)",
 };
 
 export const appModeLabels = {
   "test" : "test",
   "cd3pos" : "cd3pos",
   "hudep" : "hudep",
+  // "hudepTest" : "hudepTest",
 };
 
 export const appDefaultAssembly = "hg38";
@@ -32,6 +34,15 @@ export const appDefaultAutocompleteInputPlaceholder = "Specify an interval or ge
 export const appDefaultHgViewGenePaddingFraction = 0.2;
 export const appHeaderHeight = 30;
 export const appChromosomeTrackHeight = 30;
+export const appSequenceTrackHeight = 14;
+export const appSequenceTrackColormap = [
+  "#007FFF", // color of A
+  "#e8e500", // color of T
+  "#008000", // color of G
+  "#FF0038", // color of C
+  "#800080", // color of N
+  "#DCDCDC", // color of everything else
+];
 export const appCoverageTrackHeight = 20;
 export const appGeneAnnotationTrackHeight = 120;
 export const appGapTrackHeight = 2;
@@ -49,6 +60,10 @@ export const appDefaultM6AEventCategories = [
   {"unmodifiedBase": "A", "code": "a", "strand": "+"},
   {"unmodifiedBase": "T", "code": "a", "strand": "-"},
 ];
+export const appDefaultM6AEventCategoryAbbreviations = [
+  'm6A+', 
+  'm6A-'
+];
 export const appDefaultM6AEventColors = [
   appDefaultFiberSeqReadHexColor, 
   appDefaultFiberSeqReadHexColor,
@@ -61,15 +76,16 @@ export const appDefaultM6ATreatmentEventColors = [
   appDefaultFiberSeqReadTreatmentHexColor, 
   appDefaultFiberSeqReadTreatmentHexColor,
 ];
-export const appDefaultM6AEventCategoryAbbreviations = ['m6A'];
 export const appDefaultHgView5mCEventViewable = true;
 export const appDefault5mCEventCategories = [
   {"unmodifiedBase": "C", "code": "m", "strand": "+"},
 ];
+export const appDefault5mCEventCategoryAbbreviations = [
+  '5mC+'
+];
 export const appDefault5mCEventColors = [
   appDefaultFiberSeqReadCpGHexColor,
 ];
-export const appDefault5mCEventCategoryAbbreviations = ['5mC'];
 
 export const assemblyChromosomes = {
   'hg19':[
@@ -161,9 +177,11 @@ export const assemblyBounds = {
   },
 };
 
-export const testHiglassChromsizesURL = "https://pkerp.s3.amazonaws.com/public/bamfile_test/GCF_000005845.2_ASM584v2_genomic.chrom.sizes";
-
+export const hg38FastaURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes.60.fa";
+export const hg38FastaIndexURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes.60.fa.fai";
 export const hg38ChromsizesURL = "https://areynolds-us-west-2.s3.amazonaws.com/hg38.meuleman.fixedBin.chrom.sizes";
+
+export const testHiglassChromsizesURL = "https://pkerp.s3.amazonaws.com/public/bamfile_test/GCF_000005845.2_ASM584v2_genomic.chrom.sizes";
 
 export const testHiglassPileupViewconf = {
   "editable": true,
@@ -273,6 +291,25 @@ export const cd3posHiglassPileupViewconf = {
             "position" : "top"
           },
           {
+            "uid": "seq_fasta_example",
+            "type": "horizontal-sequence",
+            "data": {
+              "type": "fasta",
+              "fastaUrl": hg38FastaURL,
+              "faiUrl": hg38FastaIndexURL,
+              "chromSizesUrl": hg38ChromsizesURL
+            },
+            "options": {
+              "labelPosition": "hidden",
+              "fontSize": 10,
+              "fontFamily": "Helvetica",
+              "fontColor": "white",
+              "colorScale": appSequenceTrackColormap,
+            },
+            "height": appSequenceTrackHeight,
+            "position": "top",
+          },
+          {
             "name": "gencode.v38.annotation.gtf.higlass-transcripts.hgnc.090721.forceHGNC.coloredByVocabulary.beddb",
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid": "cv0JX4TlTIi-D1aEpV-C0A",
@@ -361,7 +398,7 @@ export const cd3posHiglassPileupViewconf = {
                   appDefaultFiberSeqReadHexColor,
                   appDefaultFiberSeqReadCpGHexColor,
                 ],
-                "categoryAbbreviations": ['m6A', '5mC'],
+                "categoryAbbreviations": ['m6A+', 'm6A-', '5mC+'],
                 "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
               },
             },
@@ -438,7 +475,26 @@ export const hudepHiglassPileupViewconf = {
               "backgroundColor" : "white"
             },
             "height" : appChromosomeTrackHeight,
-            "position" : "top"
+            "position" : "top",
+          },
+          {
+            "uid": "seq_fasta_example",
+            "type": "horizontal-sequence",
+            "data": {
+              "type": "fasta",
+              "fastaUrl": hg38FastaURL,
+              "faiUrl": hg38FastaIndexURL,
+              "chromSizesUrl": hg38ChromsizesURL
+            },
+            "options": {
+              "labelPosition": "hidden",
+              "fontSize": 10,
+              "fontFamily": "Helvetica",
+              "fontColor": "white",
+              "colorScale": appSequenceTrackColormap,
+            },
+            "height": appSequenceTrackHeight,
+            "position": "top",
           },
           {
             "type": "pileup",
@@ -473,7 +529,7 @@ export const hudepHiglassPileupViewconf = {
                   appDefaultFiberSeqReadControlHexColor,
                   appDefaultFiberSeqReadCpGHexColor,
                 ],
-                "categoryAbbreviations": ['m6A', '5mC'],
+                "categoryAbbreviations": ['m6A+', 'm6A-', '5mC+'],
                 "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
               },
               "showLoadingText": false,
@@ -523,7 +579,7 @@ export const hudepHiglassPileupViewconf = {
                   appDefaultFiberSeqReadTreatmentHexColor,
                   appDefaultFiberSeqReadCpGHexColor,
                 ],
-                "categoryAbbreviations": ['m6A', '5mC'],
+                "categoryAbbreviations": ['m6A+', 'm6A-', '5mC+'],
                 "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
               },
               "showLoadingText": false,
@@ -564,6 +620,12 @@ export const hudepHiglassPileupViewconf = {
               "blockCalculateTranscriptCounts": true,
               "highlightTranscriptType": "longestIsoform",
               "highlightTranscriptTrackBackgroundColor": "#fdcfcf",
+              "sequenceData": { // If this is set, transcribed amino acids are displayed when sufficiently zoomed in
+                "type": "fasta",
+                "fastaUrl": "https://aveit.s3.amazonaws.com/higlass/data/sequence/hg38.fa",
+                "faiUrl": "https://aveit.s3.amazonaws.com/higlass/data/sequence/hg38.fa.fai",
+                "chromSizesUrl": "https://aveit.s3.amazonaws.com/higlass/data/sequence/hg38.mod.chrom.sizes"
+              },
             },
             "height" : appGeneAnnotationTrackHeight,
           },
@@ -629,6 +691,201 @@ export const hudepHiglassPileupViewconf = {
               "valueScaleMin": -2,
               "valueScaleMax": 2,
               "colorRange": appDefaultFiberSeqReadFoldChangeHexColormap,
+              "showMousePosition" : true,
+              "showTooltip": true,
+              "minHeight": appCoverageTrackHeight,
+            },
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
+          },
+        ]
+      },
+      "layout": {
+        "w": 12,
+        "h": 12,
+        "x": 0,
+        "y": 0,
+      }
+    }
+  ]
+}
+
+export const hudepTestControlTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test3.bam";
+export const hudepTestControlTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test3.bam.bai";
+
+export const hudepTestHiglassPileupViewconf = {
+  "editable": true,
+  "zoomFixed" : false,
+  "trackSourceServers": [
+    "/api/v1",
+    "http://higlass.io/api/v1"
+  ],
+  "exportViewUrl": "/api/v1/viewconfs",
+  "views": [
+    {
+      "uid" : "abcd0002",
+      "initialXDomain": [
+        1813933893,
+        1813936188
+      ],
+      "genomePositionSearchBoxVisible" : true,
+      "genomePositionSearchBox" : {
+        "autocompleteServer" : "http://higlass.io/api/v1",
+        "chromInfoServer" : "http://higlass.io/api/v1",
+        "visible" : true,
+        "chromInfoId" : "hg38"
+      },
+      "tracks": {
+        "top": [
+          {
+            "name" : "chromosomes_hg38",
+            "created" : "2019-04-11T15:11:47.798450Z",
+            "project" : "bLwQYp24jRG2YyAxGaGGwMg",
+            "project_name" : "",
+            "description" : "",
+            "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
+            "tilesetUid" : "e7yehSFuSvWu0_9uEK1Apw",
+            "uid" : "4fd8b376-f112-4839-a5e1-cb8b4d4907-a",
+            "type" : "horizontal-chromosome-labels",
+            "options" : {
+              "color" : "#777777",
+              "stroke" : "#FFFFFF",
+              "fontSize" : 12,
+              "fontIsAligned" : false,
+              "showMousePosition" : true,
+              "mousePositionColor" : "#999999",
+              "name" : "chromosomes_hg38",
+              "backgroundColor" : "white"
+            },
+            "height" : appChromosomeTrackHeight,
+            "position" : "top",
+          },
+          {
+            "uid": "seq_fasta_example",
+            "type": "horizontal-sequence",
+            "data": {
+              "type": "fasta",
+              "fastaUrl": hg38FastaURL,
+              "faiUrl": hg38FastaIndexURL,
+              "chromSizesUrl": hg38ChromsizesURL
+            },
+            "options": {
+              "labelPosition": "hidden",
+              "fontSize": 10,
+              "fontFamily": "Helvetica",
+              "fontColor": "white",
+              "colorScale": appSequenceTrackColormap,
+            },
+            "height": appSequenceTrackHeight,
+            "position": "top",
+          },
+          {
+            "type": "pileup",
+            "height": 320,
+            "options": {
+              "axisPositionHorizontal": "right",
+              "axisLabelFormatting": "normal",
+              "outlineReadOnHover": "yes",
+              // "groupBy": "strand",
+              // "minusStrandColor": "#ebebeb",
+              // "plusStrandColor": "#ebebeb",
+              "showCoverage": false,
+              "colorScale": [
+                // A T G C N Other
+                "#2c7bb6",
+                "#92c5de",
+                "#ffffbf",
+                "#fdae61",
+                "#808080",
+                "#DCDCDC"
+              ],
+              "methylation": {
+                "set": "control", 
+                "hideSubstitutions": true,
+                "categories": [
+                  {"unmodifiedBase": "A", "code": "a", "strand": "+"},
+                  {"unmodifiedBase": "T", "code": "a", "strand": "-"},
+                  {"unmodifiedBase": "C", "code": "m", "strand": "+"},
+                ],
+                "colors": [
+                  appDefaultFiberSeqReadControlHexColor, 
+                  appDefaultFiberSeqReadControlHexColor,
+                  appDefaultFiberSeqReadCpGHexColor,
+                ],
+                "categoryAbbreviations": [
+                  'm6A+', 
+                  'm6A-', 
+                  '5mC+'
+                ],
+                "probabilityThresholdRange": appDefaultProbabilityThresholdRange,
+              },
+              "showLoadingText": false,
+              "showMousePosition" : true,
+            },
+            "uid": "FylkvVBTSumoJ959H-5A-1",
+            "data": {
+              "type": "bam",
+              "bamUrl": hudepTestControlTestBAMURL,
+              "baiUrl": hudepTestControlTestBAIURL,
+              "chromSizesUrl": hg38ChromsizesURL,
+              "options": {
+                  "maxTileWidth": appDefaultTileWidth,
+              },
+            },
+          },
+          {
+            "name": "gencode.v38.annotation.gtf.higlass-transcripts.hgnc.090721.forceHGNC.coloredByVocabulary.beddb",
+            "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
+            "tilesetUid": "cv0JX4TlTIi-D1aEpV-C0A",
+            "type": "horizontal-transcripts",
+            "uid": "cv0JX4TlTIi-D1aEpV-C0A",
+            "options": {
+              "blockStyle": "directional", // "UCSC-like",
+              "maxRows": 6,
+              "maxTexts": 50,
+              "labelFontSize": 10,
+              "labelFontWeight": 500,
+              "transcriptHeight": 14,
+              "transcriptSpacing": 4,
+              "showMousePosition": true,
+              "startCollapsed": false,
+              "showToggleTranscriptsButton": false,
+              "utrColor": "grey",
+              "plusStrandColor": "#111111",
+              "minusStrandColor": "#111111",
+              "trackMargin": {top:10, bottom:10, left:0, right:0},
+              "blockCalculateTranscriptCounts": true,
+              "highlightTranscriptType": "longestIsoform",
+              "highlightTranscriptTrackBackgroundColor": "#fdcfcf",
+              "sequenceData": { // If this is set, transcribed amino acids are displayed when sufficiently zoomed in
+                "type": "fasta",
+                "fastaUrl": "https://aveit.s3.amazonaws.com/higlass/data/sequence/hg38.fa",
+                "faiUrl": "https://aveit.s3.amazonaws.com/higlass/data/sequence/hg38.fa.fai",
+                "chromSizesUrl": "https://aveit.s3.amazonaws.com/higlass/data/sequence/hg38.mod.chrom.sizes"
+              },
+            },
+            "height" : appGeneAnnotationTrackHeight,
+          },
+          {
+            "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBaseMeanWithClipped.filtered.versionSort.bedgraph.bw",
+            "type": "bar",
+            "height": appCoverageTrackHeight,
+            "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
+            "tilesetUid" : "VDUE1tG2TTKw8OKAZK6HmA",
+            "uid" : "bwtest-001",
+            "options" : {
+              "labelPosition": "hidden",
+              "name": "HUDEP.control.DS182418.chr11.m6aEventsPerBaseMeanWithClipped",
+              "valueScaling": "linear",
+              "valueScaleMin": 0,
+              // "valueScaleMax": 20,
+              // "lineStrokeWidth": 1,
+              // "lineStrokeColor": appDefaultFiberSeqReadControlHexColor,
+              "colorRange": ['#FFFFFF', appDefaultFiberSeqReadControlHexColor],
               "showMousePosition" : true,
               "showTooltip": true,
               "minHeight": appCoverageTrackHeight,

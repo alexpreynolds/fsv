@@ -202,7 +202,7 @@ class App extends Component {
           - Constants.appChromosomeTrackHeight
           - Constants.appSequenceTrackHeight
           - Constants.appCoverageTrackHeight
-          - Constants.appGapTrackHeight
+          - 2 * Constants.appGapTrackHeight
           - Constants.appGeneAnnotationTrackHeight;
         break;
       case Constants.appModeLabels.hudep:
@@ -212,7 +212,7 @@ class App extends Component {
           - Constants.appSequenceTrackHeight
           - Constants.appGeneAnnotationTrackHeight
           - 3 * Constants.appCoverageTrackHeight
-          - 2 * Constants.appGapTrackHeight;
+          - 3 * Constants.appGapTrackHeight;
         const perPileupHeight = parseInt(totalAvailableHudepPileupHeight / 2);
         newPileupHeight = perPileupHeight;
         break;
@@ -223,7 +223,7 @@ class App extends Component {
           - Constants.appSequenceTrackHeight
           - Constants.appGeneAnnotationTrackHeight
           - Constants.appCoverageTrackHeight
-          - Constants.appGapTrackHeight;
+          - 2 * Constants.appGapTrackHeight;
         newPileupHeight = totalAvailableHudepTestPileupHeight;
         break;
       default:

@@ -310,6 +310,12 @@ export const cd3posHiglassPileupViewconf = {
             "position": "top",
           },
           {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
+          },
+          {
             "name": "gencode.v38.annotation.gtf.higlass-transcripts.hgnc.090721.forceHGNC.coloredByVocabulary.beddb",
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid": "cv0JX4TlTIi-D1aEpV-C0A",
@@ -495,6 +501,12 @@ export const hudepHiglassPileupViewconf = {
             },
             "height": appSequenceTrackHeight,
             "position": "top",
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
           },
           {
             "type": "pileup",
@@ -782,6 +794,12 @@ export const hudepTestHiglassPileupViewconf = {
             },
             "height": appSequenceTrackHeight,
             "position": "top",
+          },
+          {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
           },
           {
             "type": "pileup",

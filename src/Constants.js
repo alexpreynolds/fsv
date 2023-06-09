@@ -344,7 +344,7 @@ export const cd3posHiglassPileupViewconf = {
           },
           {
             "name": "fsv.d2.stim.chr11.m6aEventsPerBaseMeanWithClipped.filtered.versionSort.bedgraph.bw",
-            "type": "bar", // "1d-heatmap", // "horizontal-line",
+            "type": "bar",
             "height": appCoverageTrackHeight,
             "server" : "https://meuleman-higlass-us-west-2.altius.org/api/v1",
             "tilesetUid" : "WS0YhpG8S4CXn62fhLXwXg",
@@ -354,9 +354,6 @@ export const cd3posHiglassPileupViewconf = {
               "name": "fsv.d2.stim.chr11.m6aEventsPerBaseMeanWithClipped.filtered.versionSort.bedgraph.bw",
               "valueScaling": "linear",
               "valueScaleMin": 0,
-              // "valueScaleMax": 20,
-              // "lineStrokeWidth": 1,
-              // "lineStrokeColor": appDefaultFiberSeqReadHexColor,
               "colorRange": ['#FFFFFF', appDefaultFiberSeqReadHexColor],
               "showMousePosition" : true,
               "showTooltip": true,
@@ -559,6 +556,12 @@ export const hudepHiglassPileupViewconf = {
             },
           },
           {
+            "name": "spacer",
+            "type": "empty",
+            "height": appGapTrackHeight,
+            "uid": "abcd",
+          },
+          {
             "type": "pileup",
             "height": 320,
             "options": {
@@ -726,8 +729,8 @@ export const hudepHiglassPileupViewconf = {
   ]
 }
 
-export const hudepTestControlTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test3.bam";
-export const hudepTestControlTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test3.bam.bai";
+export const hudepTestControlTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test4.bam";
+export const hudepTestControlTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test4.bam.bai";
 
 export const hudepTestHiglassPileupViewconf = {
   "editable": true,

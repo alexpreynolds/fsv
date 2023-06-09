@@ -212,7 +212,7 @@ class App extends Component {
           - Constants.appSequenceTrackHeight
           - Constants.appGeneAnnotationTrackHeight
           - 3 * Constants.appCoverageTrackHeight
-          - 3 * Constants.appGapTrackHeight;
+          - 4 * Constants.appGapTrackHeight;
         const perPileupHeight = parseInt(totalAvailableHudepPileupHeight / 2);
         newPileupHeight = perPileupHeight;
         break;

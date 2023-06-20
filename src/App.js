@@ -380,8 +380,7 @@ class App extends Component {
     this.setState({
       clusterCoverEnabled: true,
       clusterCoverDimensions: {w: windowWidthInPixels, h: windowHeightInPixels},
-
-    }, () => {})
+    });
   }
 
   xPositionToGenomicCoordinate = (x) => {
@@ -1238,7 +1237,7 @@ class App extends Component {
         });
       }, 2)}>
         <div className="row header">
-          <div className="header-content">
+          <div className="header-content" style={{pointerEvents:(this.state.clusterCoverEnabled) ? "none" : "auto"}}>
             <div className="header-hamburger">
               { (this.state.hamburgerClosedState) 
               ?
@@ -1301,7 +1300,7 @@ class App extends Component {
                 isDisabled={!this.isAutocompleteEnabled()}
               />
             </div>
-            <div className={this.isPileupTrackClusteringButtonEnabled() ? "header-tree header-tree-disabled" : "header-tree"} onClick={(e) => this.triggerPileupTrackClustering(e)} title={'Cluster over window'}>
+            <div className={this.isPileupTrackClusteringButtonEnabled() ? "header-tree header-tree-disabled" : "header-tree"} onClick={(e) => this.triggerPileupTrackClustering(e)} title={'Cluster molecules over window'}>
               <FaTree />
             </div>
             <div className={this.isPileupTrackLayoutRefreshButtonEnabled() ? "header-repile header-repile-disabled" : "header-repile"} onClick={(e) => this.triggerPileupTrackRefreshLayout(e)} title={'Redo molecule layout'}>
@@ -1333,7 +1332,7 @@ class App extends Component {
                         right: (this.state.mousePosition.x > parseInt(window.innerWidth) / 2) ? parseInt(window.innerWidth) - this.state.mousePosition.x + (this.state.clusterCoverDimensions.w / 2) : "unset",
                       }} 
                       >
-                      <Badge color="success" pill>{this.state.hgViewCurrentPosition.left.chrom}:{this.xPositionToGenomicCoordinate(this.state.mousePosition.x - this.state.clusterCoverDimensions.w / 2)}-{this.xPositionToGenomicCoordinate(this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2)}</Badge>
+                      <Badge color="dark" pill>{this.state.hgViewCurrentPosition.left.chrom}:{this.xPositionToGenomicCoordinate(this.state.mousePosition.x - this.state.clusterCoverDimensions.w / 2)}-{this.xPositionToGenomicCoordinate(this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2)}</Badge>
                     </div>
                     <div 
                       className="content-cluster-content-drop" 

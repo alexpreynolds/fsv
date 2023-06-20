@@ -2,6 +2,8 @@
   height: calc(100vh);
   width: calc(100vw);
   overflow: hidden;
+  overscroll-behavior: contain;
+  position: fixed;
 }
 
 body {

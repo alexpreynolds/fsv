@@ -93,6 +93,7 @@ class App extends Component {
       fetchingTilesetInfo: {},
       hamburgerClosedState: true,
       clusterCoverEnabled: false,
+      clusterCoverDropBasesWidth: 500,
       clusterCoverDimensions: {w: 0, h: 0},
       mousePosition: {x: -1000, y: -1000},
     };
@@ -374,7 +375,7 @@ class App extends Component {
     const scale = Helpers.calculateScale(posn.left.chrom, posn.right.chrom, posn.left.start, posn.right.stop, this, true);
     const viewportWidth = parseInt(window.innerWidth);
     const pixelsPerBase = viewportWidth / scale.diff;
-    const windowWidthInBases = 500;
+    const windowWidthInBases = this.state.clusterCoverDropBasesWidth;
     const windowWidthInPixels = parseInt(windowWidthInBases * pixelsPerBase);
     const windowHeightInPixels = parseInt(window.innerHeight) - Constants.appHeaderHeight;
     this.setState({
@@ -1332,7 +1333,7 @@ class App extends Component {
                         right: (this.state.mousePosition.x > parseInt(window.innerWidth) / 2) ? parseInt(window.innerWidth) - this.state.mousePosition.x + (this.state.clusterCoverDimensions.w / 2) : "unset",
                       }} 
                       >
-                      <Badge color="dark" pill>{this.state.hgViewCurrentPosition.left.chrom}:{this.xPositionToGenomicCoordinate(this.state.mousePosition.x - this.state.clusterCoverDimensions.w / 2)}-{this.xPositionToGenomicCoordinate(this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2)}</Badge>
+                      <Badge color="dark" pill>{((this.state.mousePosition.x < parseInt(window.innerWidth) / 2) ? '◄ ' : '')}{this.state.hgViewCurrentPosition.left.chrom}:{this.xPositionToGenomicCoordinate(this.state.mousePosition.x - this.state.clusterCoverDimensions.w / 2)}-{this.xPositionToGenomicCoordinate(this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2)}{((this.state.mousePosition.x <= parseInt(window.innerWidth) / 2) ? '' : ' ►')}</Badge>
                     </div>
                     <div 
                       className="content-cluster-content-drop" 
@@ -1340,7 +1341,13 @@ class App extends Component {
                         width: this.state.clusterCoverDimensions.w, 
                         height: this.state.clusterCoverDimensions.h,
                         left: this.state.mousePosition.x - parseInt(this.state.clusterCoverDimensions.w / 2),
-                      }} 
+                      }}
+                      onWheel={(e) => {
+                        console.log('x' + e.deltaX);
+                        console.log('y' + e.deltaY);
+                        console.log('z' + e.deltaZ);
+                        console.log('mode' + e.deltaMode);
+                      }}
                       onClick={(e) => {
                         const x = this.state.mousePosition.x;
                         this.xPositionToGenomicCoordinate(x);

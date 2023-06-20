@@ -1,5 +1,9 @@
 import React, { Component } from "react";
 
+import {
+  Badge,
+} from "reactstrap";
+
 import axios from "axios";
 
 import { 
@@ -22,7 +26,7 @@ import "higlass-transcripts/dist/higlass-transcripts.js";
 // ref. https://github.com/higlass/higlass-sequence
 import "higlass-sequence/dist/higlass-sequence.js";
 
-import { FaBars, FaTimes, FaAngleDown, FaRegCircle, FaRegDotCircle, FaAngleRight, FaToggleOn } from 'react-icons/fa';
+import { FaBars, FaTimes, FaAngleDown, FaRegCircle, FaRegDotCircle, FaAngleRight, FaToggleOn, FaClipboard, FaIcicles, FaTree } from 'react-icons/fa';
 
 import Drawer from 'react-modern-drawer';
 import 'react-modern-drawer/dist/index.css';
@@ -56,6 +60,7 @@ class App extends Component {
       windowWidth: undefined,
       title: "fiber-seq viewer",
       assembly: Constants.appDefaultAssembly,
+      currentChrom: 'chr11',
       mode: Constants.appDefaultMode,
       modeToggleEnabled: true,
       hgViewKey: 0,
@@ -87,7 +92,11 @@ class App extends Component {
       coverVisible: {},
       fetchingTilesetInfo: {},
       hamburgerClosedState: true,
+      clusterCoverEnabled: false,
+      clusterCoverDimensions: {w: 0, h: 0},
+      mousePosition: {x: -1000, y: -1000},
     };
+
     this.hgViewRef = React.createRef();
     
     const csu = (this.state.mode === Constants.appModeLabels.test) ? Constants.testHiglassChromsizesURL : Constants.hg38ChromsizesURL;
@@ -112,6 +121,9 @@ class App extends Component {
       default:
         throw Error("Unknown application mode; could not set up viewconf in constructor");
     }
+
+    this.viewerBc = new BroadcastChannel(`pileup-track-viewer`);
+    this.viewerBc.postMessage({state: 'loading', msg: 'warming up...'});
 
     this.pileupTrackStatusMonitors = {};
 
@@ -157,6 +169,63 @@ class App extends Component {
             track.options.methylation.colors = newMethylationEventColors;
             track.options.methylation.categoryAbbreviations = newMethylationEventCategoryAbbreviations;
             // console.log(`track.options.methylation ${JSON.stringify(track.options.methylation)}`);
+            switch (track.options.methylation.group) {
+              case "HUDEP":
+                switch (track.options.methylation.set) {
+                  case "control":
+                    track.data.bamUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.${this.state.currentChrom}.bam`;
+                    track.data.baiUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.${this.state.currentChrom}.bam.bai`;
+                    break;
+                  case "treatment":
+                    track.data.bamUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.treatment.DS182417.${this.state.currentChrom}.bam`;
+                    track.data.baiUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.treatment.DS182417.${this.state.currentChrom}.bam.bai`;
+                    break;
+                  default:
+                    break;
+                }
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case "bar": 
+          switch (track.group) {
+            case "HUDEP":
+              switch (track.set) {
+                case "control":
+                  track.name = `${track.group}.${track.set}.${this.state.currentChrom}`;
+                  track.tilesetUid = Constants.bigWigUids['HUDEP']['control']['m6aEventsPerBaseMeanWithClipped'][this.state.currentChrom];
+                  track.options.name = `${track.group}.${track.set}.${this.state.currentChrom}`;
+                  break;
+                case "treatment":
+                  track.name = `${track.group}.${track.set}.${this.state.currentChrom}`;
+                  track.tilesetUid = Constants.bigWigUids['HUDEP']['treatment']['m6aEventsPerBaseMeanWithClipped'][this.state.currentChrom];
+                  track.options.name = `${track.group}.${track.set}.${this.state.currentChrom}`;
+                  break;
+                default:
+                  break;
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        case "1d-heatmap":
+          switch (track.group) {
+            case "HUDEP":
+              switch (track.set) {
+                case "log2FC":
+                  track.name = `${track.group}.${track.set}.${this.state.currentChrom}`;
+                  track.tilesetUid = Constants.bigWigUids['HUDEP']['log2FC']['m6aEventsPerBaseMeanWithClipped'][this.state.currentChrom];
+                  track.options.name = `${track.group}.${track.set}.${this.state.currentChrom}`;
+                  break;
+                default:
+                  break;
+              }
+              break;
+            default:
+              break;
           }
           break;
         default:
@@ -169,6 +238,7 @@ class App extends Component {
     // this.queryHiglassIoForDefaultViewconf();
     this.handleResize();
     window.addEventListener('resize', this.handleResize);
+    document.addEventListener("keydown", this.handleKeyDown);
     setTimeout(() => {
       this.hgViewRef.api.on("location", (event) => { 
         this.updateViewerLocation(event);
@@ -186,6 +256,7 @@ class App extends Component {
     // this.pileupTrackStatusMonitor.close();
     Object.keys(this.pileupTrackStatusMonitors).forEach(k => this.pileupTrackStatusMonitors[k].close());
     window.removeEventListener('resize', this.handleResize);
+    document.removeEventListener("keydown", this.handleKeyDown);
   }
 
   handleResize = debounce(() => {
@@ -291,7 +362,59 @@ class App extends Component {
     });
   };
 
-  isAutocompleteEnabled = () => (this.state.mode !== Constants.appModeLabels.test);
+  triggerPileupTrackRefreshLayout = () => {
+    if (Object.values(this.state.coverVisible).some(e => e === true)) return;
+    this.viewerBc.postMessage({state: 'request', msg: 'refresh-layout'});
+  }
+
+  triggerPileupTrackClustering = () => {
+    if (Object.values(this.state.coverVisible).some(e => e === true)) return;
+    if ((!this.state.hgViewCurrentPosition) || (this.state.mode === Constants.appModeLabels.test)) return "";
+    const posn = this.state.hgViewCurrentPosition;
+    const scale = Helpers.calculateScale(posn.left.chrom, posn.right.chrom, posn.left.start, posn.right.stop, this, true);
+    const viewportWidth = parseInt(window.innerWidth);
+    const pixelsPerBase = viewportWidth / scale.diff;
+    const windowWidthInBases = 500;
+    const windowWidthInPixels = parseInt(windowWidthInBases * pixelsPerBase);
+    const windowHeightInPixels = parseInt(window.innerHeight) - Constants.appHeaderHeight;
+    this.setState({
+      clusterCoverEnabled: true,
+      clusterCoverDimensions: {w: windowWidthInPixels, h: windowHeightInPixels},
+
+    }, () => {})
+  }
+
+  xPositionToGenomicCoordinate = (x) => {
+    const posn = this.state.hgViewCurrentPosition;
+    const scale = Helpers.calculateScale(posn.left.chrom, posn.right.chrom, posn.left.start, posn.right.stop, this, true);
+    const viewportWidth = parseInt(window.innerWidth);
+    const basesPerPixel = scale.diff / viewportWidth;
+    const start = posn.left.start + parseInt(x * basesPerPixel);
+    console.log(`${posn.left.chrom}:${start}`);
+    return start;
+  }
+
+  isPileupTrackClusteringButtonEnabled = () => Object.values(this.state.coverVisible).some(e => e === true);
+
+  isPileupTrackLayoutRefreshButtonEnabled = () => Object.values(this.state.coverVisible).some(e => e === true);
+
+  isAutocompleteEnabled = () => (this.state.mode !== Constants.appModeLabels.test) && Object.values(this.state.coverVisible).every(e => e === false);
+
+  handleKeyDown = (event) => {
+    const ESCAPE_KEY = 27;
+    switch (event.keyCode) {
+      case ESCAPE_KEY: 
+        if (this.state.clusterCoverEnabled) {
+          const newClusterCoverEnabled = false;
+          this.setState({
+            clusterCoverEnabled: newClusterCoverEnabled,
+          });
+        }
+        break;
+      default:
+        break;
+    }
+  }
 
   updateViewerLocation = (event) => {
     if (!this.state.chromInfo) return;
@@ -688,14 +811,106 @@ class App extends Component {
   hgViewUpdatePosition = (genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight) => {
     if (!this.hgViewRef || !this.state.chromInfo) return;
     // console.log("[hgViewUpdatePosition]", genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight);
-    this.hgViewRef.zoomTo(
-      this.state.hgViewconf.views[0].uid,
-      this.state.chromInfo.chrToAbs([chrLeft, startLeft]),
-      this.state.chromInfo.chrToAbs([chrLeft, stopLeft]),
-      this.state.chromInfo.chrToAbs([chrRight, startRight]),
-      this.state.chromInfo.chrToAbs([chrRight, stopRight]),
-      10,
-    );
+
+    const self = this;
+    function jumpToPosition(animationTime) {
+      self.hgViewRef.zoomTo(
+        self.state.hgViewconf.views[0].uid,
+        self.state.chromInfo.chrToAbs([chrLeft, startLeft]),
+        self.state.chromInfo.chrToAbs([chrLeft, stopLeft]),
+        self.state.chromInfo.chrToAbs([chrRight, startRight]),
+        self.state.chromInfo.chrToAbs([chrRight, stopRight]),
+        animationTime,
+      );
+    }
+
+    if ((chrLeft === chrRight) && (chrLeft !== this.state.currentChrom) && (chrRight !== this.state.currentChrom)) {
+      const newCurrentChrom = chrLeft;
+      const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
+      const newHgViewKey = this.state.hgViewKey + 1;
+      newHgViewconf.views[0].tracks.top.forEach((track, i) => {
+        switch (track.type) {
+          case "pileup":
+            if (track.options.methylation) {
+              switch (track.options.methylation.group) {
+                case "HUDEP":
+                  switch (track.options.methylation.set) {
+                    case "control":
+                      track.data.bamUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.${newCurrentChrom}.bam`;
+                      track.data.baiUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.${newCurrentChrom}.bam.bai`;
+                      break;
+                    case "treatment":
+                      track.data.bamUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.treatment.DS182417.${newCurrentChrom}.bam`;
+                      track.data.baiUrl = `https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.treatment.DS182417.${newCurrentChrom}.bam.bai`;
+                      break;
+                    default:
+                      break;
+                  }
+                  break;
+                default:
+                  break;
+              }
+            }
+            break;
+          case "bar": 
+            switch (track.group) {
+              case "HUDEP":
+                switch (track.set) {
+                  case "control":
+                    track.name = `${track.group}.${track.set}.${newCurrentChrom}`;
+                    track.tilesetUid = Constants.bigWigUids['HUDEP']['control']['m6aEventsPerBaseMeanWithClipped'][newCurrentChrom];
+                    track.options.name = `${track.group}.${track.set}.${newCurrentChrom}`;
+                    break;
+                  case "treatment":
+                    track.name = `${track.group}.${track.set}.${newCurrentChrom}`;
+                    track.tilesetUid = Constants.bigWigUids['HUDEP']['treatment']['m6aEventsPerBaseMeanWithClipped'][newCurrentChrom];
+                    track.options.name = `${track.group}.${track.set}.${newCurrentChrom}`;
+                    break;
+                  default:
+                    break;
+                }
+                break;
+              default:
+                break;
+            }
+            break;
+          case "1d-heatmap":
+            switch (track.group) {
+              case "HUDEP":
+                switch (track.set) {
+                  case "log2FC":
+                    track.name = `${track.group}.${track.set}.${newCurrentChrom}`;
+                    track.tilesetUid = Constants.bigWigUids['HUDEP']['log2FC']['m6aEventsPerBaseMeanWithClipped'][newCurrentChrom];
+                    track.options.name = `${track.group}.${track.set}.${newCurrentChrom}`;
+                    break;
+                  default:
+                    break;
+                }
+                break;
+              default:
+                break;
+            }
+            break;
+          default:
+            break;
+        }
+      });
+      this.setState({
+        hgViewKey: newHgViewKey,
+        hgViewconf: newHgViewconf,
+        currentChrom: newCurrentChrom,
+      }, () => {
+        this.hgViewRef.api.on("location", (event) => { 
+          this.updateViewerLocation(event);
+        });
+        setTimeout(() => {
+          jumpToPosition(10);
+        }, 100);
+      })
+    }
+    else {
+      jumpToPosition(10);
+    }
   }
 
   zoomToChr11HBG2 = () => {
@@ -714,11 +929,11 @@ class App extends Component {
     this.hgViewUpdatePosition(
       this.state.assembly,
       'chr11',
-      60100,
-      60130,
+      0,
+      135086622,
       'chr11',
-      60100,
-      60130,
+      0,
+      135086622,
     );  
   }
 
@@ -1008,9 +1223,20 @@ class App extends Component {
     return (p.left.chrom === p.right.chrom) ? `${p.left.chrom}:${p.left.start}-${p.right.stop} ${scale.scaleAsStr}` : `${p.left.chrom}:${p.left.start} - ${p.right.chrom}:${p.right.stop} ${scale.scaleAsStr}`;
   }
 
+  copyCurrentPositionToClipboard = () => {
+    if ((!this.state.hgViewCurrentPosition) || (this.state.mode === Constants.appModeLabels.test)) return "";
+    const p = this.state.hgViewCurrentPosition;
+    const locationAsStr = (p.left.chrom === p.right.chrom) ? `${p.left.chrom}:${p.left.start}-${p.right.stop}` : `${p.left.chrom}:${p.left.start} - ${p.right.chrom}:${p.right.stop}`;
+    navigator.clipboard.writeText(locationAsStr);
+  }
+
   render() {
     return (
-      <div className="box">
+      <div className="box" onMouseMove={debounce((e) => {
+        this.setState({
+          mousePosition:{x: e.clientX, y: e.clientY}
+        });
+      }, 2)}>
         <div className="row header">
           <div className="header-content">
             <div className="header-hamburger">
@@ -1075,15 +1301,58 @@ class App extends Component {
                 isDisabled={!this.isAutocompleteEnabled()}
               />
             </div>
+            <div className={this.isPileupTrackClusteringButtonEnabled() ? "header-tree header-tree-disabled" : "header-tree"} onClick={(e) => this.triggerPileupTrackClustering(e)} title={'Cluster over window'}>
+              <FaTree />
+            </div>
+            <div className={this.isPileupTrackLayoutRefreshButtonEnabled() ? "header-repile header-repile-disabled" : "header-repile"} onClick={(e) => this.triggerPileupTrackRefreshLayout(e)} title={'Redo molecule layout'}>
+              <FaIcicles />
+            </div>
             <div className="header-location">
               {this.currentPosition()}
+              <div className="header-location-clipboard" onClick={(e) => this.copyCurrentPositionToClipboard(e)} title={'Copy location to clipboard'}>
+                <FaClipboard />
+              </div>
             </div>
           </div>
         </div>
         <div className="row content">
           { (this.state.hgViewconf) 
             ?
-            <div className="content-parent"> 
+            <div className="content-hg-parent"> 
+              {
+                (!this.state.clusterCoverEnabled)
+                ? <div />
+                : 
+                  <div className="content-cluster-parent">
+                    <div 
+                      className="content-cluster-content-info"
+                      style={{
+                        position: "absolute",
+                        top: parseInt((parseInt(window.innerHeight) - Constants.appHeaderHeight) / 2),
+                        left: (this.state.mousePosition.x < parseInt(window.innerWidth) / 2) ? this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2 : "unset",
+                        right: (this.state.mousePosition.x > parseInt(window.innerWidth) / 2) ? parseInt(window.innerWidth) - this.state.mousePosition.x + (this.state.clusterCoverDimensions.w / 2) : "unset",
+                      }} 
+                      >
+                      <Badge color="success" pill>{this.state.hgViewCurrentPosition.left.chrom}:{this.xPositionToGenomicCoordinate(this.state.mousePosition.x - this.state.clusterCoverDimensions.w / 2)}-{this.xPositionToGenomicCoordinate(this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2)}</Badge>
+                    </div>
+                    <div 
+                      className="content-cluster-content-drop" 
+                      style={{
+                        width: this.state.clusterCoverDimensions.w, 
+                        height: this.state.clusterCoverDimensions.h,
+                        left: this.state.mousePosition.x - parseInt(this.state.clusterCoverDimensions.w / 2),
+                      }} 
+                      onClick={(e) => {
+                        const x = this.state.mousePosition.x;
+                        this.xPositionToGenomicCoordinate(x);
+                        this.setState({
+                          clusterCoverEnabled: false,
+                        });
+                      }}
+                    />
+                    <div className="content-cluster-content-cover" />
+                  </div>
+              }
               { 
                 (!this.state.coverEnabled) 
                   ? <div /> 

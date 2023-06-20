@@ -30,7 +30,34 @@ body {
   outline: none;
 }
 
-.content-parent {
+.content-cluster-parent {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  z-index: 2;
+  width: calc(100vw);
+  height: calc(100vh);
+}
+
+.content-cluster-content-info {
+  position: absolute;
+  z-index: 4;
+  bottom: 100px;
+  left: 100px;
+}
+
+.content-cluster-content-drop {
+  position: absolute;
+  z-index: 3;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.content-cluster-content-cover {
+  pointer-events: none;
+}
+
+.content-hg-parent {
   padding: 0;
   margin: 0;
 }
@@ -130,6 +157,7 @@ body {
 
 .react-grid-layout {
   height: calc(100vh) !important;
+  width: calc(100vw) !important;
 }
 
 /* UX */
@@ -204,12 +232,45 @@ body {
   padding-left: 8px;
 }
 
+.header-repile, .header-tree {
+  display: inline-block;
+  float: right;
+  font-size: 0.75em;
+  position: relative;
+  top: 4px;
+  padding-left: 12px;
+  cursor: pointer;
+}
+
+.header-repile-disabled, .header-tree-disabled {
+  cursor: not-allowed;
+  color: lightslategray;
+}
+
+.header-repile:hover, .header-tree:hover {
+  color: lightslategray;
+}
+
 .header-location {
   display: inline-block;
   float: right;
   position: relative;
   top: 2px;
   padding-left: 8px;
+}
+
+.header-location-clipboard {
+  display: inline-block;
+  font-size: 0.75em;
+  position: relative;
+  bottom: 3px;
+  padding-left: 4px;
+  padding-right: 1px;
+  cursor: pointer;
+}
+
+.header-location-clipboard:hover {
+  color: lightslategray;
 }
 
 .header-autocomplete {

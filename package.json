@@ -8,7 +8,7 @@
     "@testing-library/user-event": "^12.0.0",
     "axios": "^1.3.5",
     "bootstrap": "^5.2.3",
-    "higlass": "1.12.2",
+    "higlass": "^1.12.4",
     "higlass-pileup": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-pileup.git#methylation",
     "higlass-sequence": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-sequence.git#methylation",
     "higlass-transcripts": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-transcripts.git#methylation",
@@ -19,19 +19,20 @@
     "react-dom": "^17.0.2",
     "react-icons": "^4.8.0",
     "react-modern-drawer": "^1.2.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "4.0.3",
     "reactstrap": "^9.1.9",
     "web-vitals": "^2.1.4"
   },
   "dependenciesComments": {
-    "higlass-pileup": "Can be represented either as: git+https://alexpreynolds@github.com/alexpreynolds/higlass-pileup.git#methylation or file:../higlass-pileup for local development purposes"
+    "higlass-pileup": "git+https://alexpreynolds@github.com/alexpreynolds/higlass-pileup.git#methylation | file:../higlass-pileup"
   },
   "scripts": {
     "clean": "rm -rf node_modules && rm -f package-lock.json && rm -rf dist && rm -rf build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "watch": "cra-build-watch --disable-chunks"
   },
   "eslintConfig": {
     "extends": [
@@ -50,5 +51,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "cra-build-watch": "^3.4.0"
+  },
+  "devDependenciesComments": {
+    "cra-build-watch": "https://github.com/Nargonath/cra-build-watch"
   }
 }

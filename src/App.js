@@ -398,7 +398,7 @@ class App extends Component {
 
   isPileupTrackLayoutRefreshButtonEnabled = () => Object.values(this.state.coverVisible).some(e => e === true);
 
-  isAutocompleteEnabled = () => (this.state.mode !== Constants.appModeLabels.test) && Object.values(this.state.coverVisible).every(e => e === false);
+  isAutocompleteEnabled = () => true; // (this.state.mode !== Constants.appModeLabels.test) && Object.values(this.state.coverVisible).every(e => e === false);
 
   handleKeyDown = (event) => {
     const ESCAPE_KEY = 27;

@@ -428,8 +428,8 @@ export const cd3posHiglassPileupViewconf = {
   ]
 }
 
-export const hudepTestControlTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test4.bam";
-export const hudepTestControlTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.control.DS182418.chr11.test4.bam.bai";
+export const hudepTestControlTestBAMURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.treatment.DS182417.chr11.test_v9.bam";
+export const hudepTestControlTestBAIURL = "https://areynolds-us-west-2.s3.us-west-2.amazonaws.com/HUDEP.treatment.DS182417.chr11.test_v9.bam.bai";
 
 export const hudepTestHiglassPileupViewconf = {
   "editable": true,

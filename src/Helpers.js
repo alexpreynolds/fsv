@@ -147,9 +147,10 @@ export const calculateScale = (leftChr, rightChr, start, stop, self, includeAsse
       }
     }
   }
-  //console.log(`calculateScale ${diff}`);
   log10Diff = log10(diff);
-  scaleAsStr = (log10Diff < 3) ? `${Math.ceil(diff/100)*100}nt` :
+  // console.log(`calculateScale ${diff} | ${log10Diff}`);
+  scaleAsStr = (log10Diff < 2) ? `${Math.ceil(diff/10)*10}nt` :
+               (log10Diff < 3) ? `${Math.ceil(diff/100)*100}nt` :
                (log10Diff < 4) ? `${Math.floor(diff/1000)}kb` :
                (log10Diff < 5) ? `${Math.floor(diff/1000)}kb` :
                (log10Diff < 6) ? `${Math.floor(diff/1000)}kb` :

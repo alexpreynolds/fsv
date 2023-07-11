@@ -86,7 +86,7 @@ class App extends Component {
       hgViewM6AEventViewable: Constants.appDefaultHgViewM6AEventViewable,
       hgView5mCEventViewable: Constants.appDefaultHgView5mCEventViewable,
       hgView5mCEventViewableToggleEnabled: true,
-      hgViewCurrentPosition: null,
+      hgViewCurrentRange: null,
       chromInfo: null,
       coverEnabled: true,
       coverVisible: {},
@@ -242,7 +242,7 @@ class App extends Component {
     document.addEventListener("keydown", this.handleKeyDown);
     setTimeout(() => {
       this.hgViewRef.api.on("location", (event) => { 
-        this.updateViewerLocation(event);
+        this.updateViewerRange(event);
       });
       if ((this.state.mode === Constants.appModeLabels.cd3pos) || (this.state.mode === Constants.appModeLabels.hudep) || (this.state.mode === Constants.appModeLabels.hudepTest)) {
         setTimeout(() => {
@@ -370,31 +370,18 @@ class App extends Component {
 
   triggerPileupTrackClustering = () => {
     if (Object.values(this.state.coverVisible).some(e => e === true)) return;
-    if ((!this.state.hgViewCurrentPosition) || (this.state.mode === Constants.appModeLabels.test)) return "";
-    const posn = this.state.hgViewCurrentPosition;
-    const scale = Helpers.calculateScale(posn.left.chrom, posn.right.chrom, posn.left.start, posn.right.stop, this, true);
-    const viewportWidth = parseInt(window.innerWidth);
-    const pixelsPerBase = viewportWidth / scale.diff;
-    const windowWidthInBases = this.state.clusterCoverDropBasesWidth;
-    const windowWidthInPixels = parseInt(windowWidthInBases * pixelsPerBase);
-    const windowHeightInPixels = parseInt(window.innerHeight) - Constants.appHeaderHeight;
-    this.setState({
-      clusterCoverEnabled: true,
-      clusterCoverDimensions: {w: windowWidthInPixels, h: windowHeightInPixels},
-    });
+    if ((!this.state.hgViewCurrentRange) || (this.state.mode === Constants.appModeLabels.test)) return;
+    const posn = this.state.hgViewCurrentRange;
+    this.viewerBc.postMessage({state: 'request', msg: 'cluster-layout', data: posn});
   }
 
-  xPositionToGenomicCoordinate = (x) => {
-    const posn = this.state.hgViewCurrentPosition;
-    const scale = Helpers.calculateScale(posn.left.chrom, posn.right.chrom, posn.left.start, posn.right.stop, this, true);
-    const viewportWidth = parseInt(window.innerWidth);
-    const basesPerPixel = scale.diff / viewportWidth;
-    const start = posn.left.start + parseInt(x * basesPerPixel);
-    console.log(`${posn.left.chrom}:${start}`);
-    return start;
+  isPileupTrackClusteringButtonEnabled = () => {
+    if ((!this.state.hgViewCurrentRange) || (this.state.mode === Constants.appModeLabels.test)) return true;
+    const p = this.state.hgViewCurrentRange;
+    const scale = Helpers.calculateScale(p.left.chrom, p.right.chrom, p.left.start, p.right.stop, this, true);
+    const rangeWithinBounds = (scale.diff < Constants.appDefaultClusterRangeBounds);
+    return !Object.values(this.state.coverVisible).some(e => e === true) && rangeWithinBounds;
   }
-
-  isPileupTrackClusteringButtonEnabled = () => Object.values(this.state.coverVisible).some(e => e === true);
 
   isPileupTrackLayoutRefreshButtonEnabled = () => Object.values(this.state.coverVisible).some(e => e === true);
 
@@ -416,7 +403,7 @@ class App extends Component {
     }
   }
 
-  updateViewerLocation = (event) => {
+  updateViewerRange = (event) => {
     if (!this.state.chromInfo) return;
     const chrStartPos = this.state.chromInfo.absToChr(event.xDomain[0]);
     const chrStopPos = this.state.chromInfo.absToChr(event.xDomain[1]);
@@ -424,8 +411,8 @@ class App extends Component {
     const start = chrStartPos[1];
     const chrRight = chrStopPos[0];
     const stop = chrStopPos[1];
-    // console.log(`updateViewerLocation: ${chrLeft}:${start}-${chrRight}:${stop}`);
-    const newHgViewCurrentPosition = {
+    // console.log(`updateViewerRange: ${chrLeft}:${start}-${chrRight}:${stop}`);
+    const newHgViewCurrentRange = {
       left: {
         chrom: chrLeft,
         start: start,
@@ -436,7 +423,7 @@ class App extends Component {
       },
     };
     this.setState({
-      hgViewCurrentPosition: newHgViewCurrentPosition,
+      hgViewCurrentRange: newHgViewCurrentRange,
     });
   }
 
@@ -479,62 +466,6 @@ class App extends Component {
     });
   }
 
-  // toggleMode = (e) => {
-  //   if (!this.state.modeToggleEnabled) return;
-  //   const currentPosition = this.state.hgViewCurrentPosition;
-  //   console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
-  //   const newMode = (this.state.mode === Constants.appModeLabels.test) ? Constants.appModeLabels.cd3pos : Constants.appModeLabels.test;
-  //   const newHgViewconf = (this.state.mode === Constants.appModeLabels.test) ? Constants.cd3posHiglassPileupViewconf : Constants.testHiglassPileupViewconf;
-  //   // console.log(`toggleMode | ${this.state.mode} -> ${newMode}`);
-  //   Object.keys(this.pileupTrackStatusMonitors).forEach(k => this.pileupTrackStatusMonitors[k].close());
-  //   const newCoverVisible = {};
-  //   const newFetchingTilesetInfo = {};
-  //   newHgViewconf.views[0].tracks.top.forEach((track, i) => {
-  //     switch (track.type) {
-  //       case "pileup":
-  //         const monitor = new BroadcastChannel(`pileup-track-${track.uid}`);
-  //         monitor.onmessage = (event) => this.handlePileupTrackStatusChange(event.data, track.uid);
-  //         this.pileupTrackStatusMonitors[track.uid] = monitor;
-  //         newCoverVisible[track.uid] = true;
-  //         newFetchingTilesetInfo[track.uid] = true;
-  //         break;
-  //       default:
-  //         break;  
-  //     }
-  //   });
-  //   this.setState({
-  //     mode: newMode,
-  //     hgViewconf: newHgViewconf,
-  //     coverVisible: newCoverVisible,
-  //     fetchingTilesetInfo: newFetchingTilesetInfo,
-  //   }, () => {
-  //     this.hgViewRef.api.on("location", (event) => { 
-  //       this.updateViewerLocation(event);
-  //     });
-  //     // this.updateChromosomeInfoObject((this.state.mode === Constants.appModeLabels.cd3pos) ? Constants.hg38ChromsizesURL : Constants.testHiglassChromsizesURL);
-  //     switch (this.state.mode) {
-  //       case Constants.appModeLabels.test:
-  //         break;
-  //       case Constants.appModeLabels.cd3pos:
-  //       case Constants.appModeLabels.hudep:
-  //         // this.zoomToChr11HBG2();
-  //         setTimeout(() => {
-  //           this.hgViewUpdatePosition(
-  //             this.state.assembly,
-  //             currentPosition.left.chrom, 
-  //             currentPosition.left.start, 
-  //             currentPosition.right.stop, 
-  //             currentPosition.right.chrom, 
-  //             currentPosition.left.start, 
-  //             currentPosition.right.stop)
-  //         }, 100);
-  //         break;
-  //       default:
-  //         throw new Error("Unknown mode passed to switchToMode fn");
-  //     }
-  //   });
-  // }
-
   toggleHgViewEditable = (e) => {
     if (!this.state.hgViewEditableToggleEnabled) return;
     const newHgViewEditable = !this.state.hgViewEditable;
@@ -544,19 +475,19 @@ class App extends Component {
       hgViewEditable: newHgViewEditable,
       hgViewconf: newHgViewconf,
     }, () => {
-      const currentPosition = this.state.hgViewCurrentPosition;
+      const currentRange = this.state.hgViewCurrentRange;
       this.hgViewRef.api.on("location", (event) => { 
-        this.updateViewerLocation(event);
+        this.updateViewerRange(event);
       });
       setTimeout(() => {
-        this.hgViewUpdatePosition(
+        this.hgViewUpdateRange(
           this.state.assembly,
-          currentPosition.left.chrom, 
-          currentPosition.left.start, 
-          currentPosition.right.stop, 
-          currentPosition.right.chrom, 
-          currentPosition.left.start, 
-          currentPosition.right.stop)
+          currentRange.left.chrom, 
+          currentRange.left.start, 
+          currentRange.right.stop, 
+          currentRange.right.chrom, 
+          currentRange.left.start, 
+          currentRange.right.stop)
       }, 100);
     });
   }
@@ -576,19 +507,19 @@ class App extends Component {
       hgViewTranscriptsDirectional: newHgViewTranscriptsDirectional,
       hgViewconf: newHgViewconf,
     }, () => {
-      const currentPosition = this.state.hgViewCurrentPosition;
+      const currentRange = this.state.hgViewCurrentRange;
       this.hgViewRef.api.on("location", (event) => { 
-        this.updateViewerLocation(event);
+        this.updateViewerRange(event);
       });
       setTimeout(() => {
-        this.hgViewUpdatePosition(
+        this.hgViewUpdateRange(
           this.state.assembly,
-          currentPosition.left.chrom, 
-          currentPosition.left.start, 
-          currentPosition.right.stop, 
-          currentPosition.right.chrom, 
-          currentPosition.left.start, 
-          currentPosition.right.stop)
+          currentRange.left.chrom, 
+          currentRange.left.start, 
+          currentRange.right.stop, 
+          currentRange.right.chrom, 
+          currentRange.left.start, 
+          currentRange.right.stop)
       }, 100);
     });
   }
@@ -635,19 +566,19 @@ class App extends Component {
       hgView5mCEventViewable: newHgView5mCEventViewable,
       hgViewconf: newHgViewconf,
     }, () => {
-      const currentPosition = this.state.hgViewCurrentPosition;
+      const currentRange = this.state.hgViewCurrentRange;
       this.hgViewRef.api.on("location", (event) => { 
-        this.updateViewerLocation(event);
+        this.updateViewerRange(event);
       });
       setTimeout(() => {
         this.hgViewUpdatePosition(
           this.state.assembly,
-          currentPosition.left.chrom, 
-          currentPosition.left.start, 
-          currentPosition.right.stop, 
-          currentPosition.right.chrom, 
-          currentPosition.left.start, 
-          currentPosition.right.stop)
+          currentRange.left.chrom, 
+          currentRange.left.start, 
+          currentRange.right.stop, 
+          currentRange.right.chrom, 
+          currentRange.left.start, 
+          currentRange.right.stop)
       }, 100);
     });
   }
@@ -657,8 +588,8 @@ class App extends Component {
     // console.log(`switchToMode m ${JSON.stringify(m)}`);
     const newHgViewKey = this.state.hgViewKey + 1;
     const newMode = m;
-    const currentPosition = this.state.hgViewCurrentPosition;
-    // console.log(`currentPosition ${JSON.stringify(currentPosition)}`);
+    const currentRange = this.state.hgViewCurrentRange;
+    // console.log(`currentRange ${JSON.stringify(currentRange)}`);
     let newHgViewconf = {};
     switch (m) {
       case Constants.appModeLabels.test:
@@ -735,7 +666,7 @@ class App extends Component {
       fetchingTilesetInfo: newFetchingTilesetInfo,
     }, () => {
       this.hgViewRef.api.on("location", (event) => { 
-        this.updateViewerLocation(event);
+        this.updateViewerRange(event);
       });
       switch (this.state.mode) {
         case Constants.appModeLabels.test:
@@ -744,14 +675,14 @@ class App extends Component {
         case Constants.appModeLabels.hudep:
         case Constants.appModeLabels.hudepTest:
           setTimeout(() => {
-            this.hgViewUpdatePosition(
+            this.hgViewUpdateRange(
               this.state.assembly,
-              currentPosition.left.chrom, 
-              currentPosition.left.start, 
-              currentPosition.right.stop, 
-              currentPosition.right.chrom, 
-              currentPosition.left.start, 
-              currentPosition.right.stop)
+              currentRange.left.chrom, 
+              currentRange.left.start, 
+              currentRange.right.stop, 
+              currentRange.right.chrom, 
+              currentRange.left.start, 
+              currentRange.right.stop)
           }, 100);
           break;
         default:
@@ -804,13 +735,13 @@ class App extends Component {
       start = ((start - padding) > 0) ? (start - padding) : 0;
       stop = ((stop + padding) < ub) ? (stop + padding) : ub;
     }
-    // this.hgViewUpdatePosition(this.state.hgViewParams.genome, chrLeft, start, stop, chrRight, start, stop, 0);
-    this.hgViewUpdatePosition(this.state.assembly, chrLeft, start, stop, chrRight, start, stop);
+    // this.hgViewUpdateRange(this.state.hgViewParams.genome, chrLeft, start, stop, chrRight, start, stop, 0);
+    this.hgViewUpdateRange(this.state.assembly, chrLeft, start, stop, chrRight, start, stop);
   }
 
-  hgViewUpdatePosition = (genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight) => {
+  hgViewUpdateRange = (genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight) => {
     if (!this.hgViewRef || !this.state.chromInfo) return;
-    // console.log("[hgViewUpdatePosition]", genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight);
+    // console.log("[hgViewUpdateRange]", genome, chrLeft, startLeft, stopLeft, chrRight, startRight, stopRight);
 
     const self = this;
     function jumpToPosition(animationTime) {
@@ -901,7 +832,7 @@ class App extends Component {
         currentChrom: newCurrentChrom,
       }, () => {
         this.hgViewRef.api.on("location", (event) => { 
-          this.updateViewerLocation(event);
+          this.updateViewerRange(event);
         });
         setTimeout(() => {
           jumpToPosition(10);
@@ -914,7 +845,7 @@ class App extends Component {
   }
 
   zoomToChr11HBG2 = () => {
-    this.hgViewUpdatePosition(
+    this.hgViewUpdateRange(
       this.state.assembly,
       'chr11',
       5254000,
@@ -926,7 +857,7 @@ class App extends Component {
   }
 
   zoomToChr11TestRegion = () => {
-    this.hgViewUpdatePosition(
+    this.hgViewUpdateRange(
       this.state.assembly,
       'chr11',
       0,
@@ -1006,7 +937,7 @@ class App extends Component {
       const newHgViewKey = this.state.hgViewKey + 1;
       const newHgViewconf = JSON.parse(JSON.stringify(this.state.hgViewconf));
       const newProbabilityThresholdRange = value.toString().split(',').map(d => parseInt(d * 255 / 100));
-      const currentPosition = this.state.hgViewCurrentPosition;
+      const currentRange = this.state.hgViewCurrentRange;
       // console.log(`${value} -> ${newProbabilityThresholdRange}`);
       newHgViewconf.views[0].tracks.top.forEach((track, i) => {
         switch (track.type) {
@@ -1023,7 +954,7 @@ class App extends Component {
         hgViewProbabilityThresholdRange: newProbabilityThresholdRange,
       }, () => {
         this.hgViewRef.api.on("location", (event) => { 
-          this.updateViewerLocation(event);
+          this.updateViewerRange(event);
         });
         switch (this.state.mode) {
           case Constants.appModeLabels.test:
@@ -1032,14 +963,14 @@ class App extends Component {
           case Constants.appModeLabels.hudep:
           case Constants.appModeLabels.hudepTest:
             setTimeout(() => {
-              this.hgViewUpdatePosition(
+              this.hgViewUpdateRange(
                 this.state.assembly,
-                currentPosition.left.chrom, 
-                currentPosition.left.start, 
-                currentPosition.right.stop, 
-                currentPosition.right.chrom, 
-                currentPosition.left.start, 
-                currentPosition.right.stop)
+                currentRange.left.chrom, 
+                currentRange.left.start, 
+                currentRange.right.stop, 
+                currentRange.right.chrom, 
+                currentRange.left.start, 
+                currentRange.right.stop)
             }, 100);
             break;
           default:
@@ -1122,19 +1053,19 @@ class App extends Component {
         hgViewconf: newHgViewconf,
         hgViewTileWidth: newTileWidth,
       }, () => {
-        const currentPosition = self.state.hgViewCurrentPosition;
+        const currentRange = self.state.hgViewCurrentRange;
         self.hgViewRef.api.on("location", (event) => { 
-          self.updateViewerLocation(event);
+          self.updateViewerRange(event);
         });
         setTimeout(() => {
-          self.hgViewUpdatePosition(
+          self.hgViewUpdateRange(
             self.state.assembly,
-            currentPosition.left.chrom, 
-            currentPosition.left.start, 
-            currentPosition.right.stop, 
-            currentPosition.right.chrom, 
-            currentPosition.left.start, 
-            currentPosition.right.stop);
+            currentRange.left.chrom, 
+            currentRange.left.start, 
+            currentRange.right.stop, 
+            currentRange.right.chrom, 
+            currentRange.left.start, 
+            currentRange.right.stop);
         }, 100);
       });
       // console.log(`${newTileWidth}`);
@@ -1216,16 +1147,16 @@ class App extends Component {
     return items;
   };
 
-  currentPosition = () => {
-    if ((!this.state.hgViewCurrentPosition) || (this.state.mode === Constants.appModeLabels.test)) return "";
-    const p = this.state.hgViewCurrentPosition;
+  currentRange = () => {
+    if ((!this.state.hgViewCurrentRange) || (this.state.mode === Constants.appModeLabels.test)) return "";
+    const p = this.state.hgViewCurrentRange;
     const scale = Helpers.calculateScale(p.left.chrom, p.right.chrom, p.left.start, p.right.stop, this, true);
     return (p.left.chrom === p.right.chrom) ? `${p.left.chrom}:${p.left.start}-${p.right.stop} ${scale.scaleAsStr}` : `${p.left.chrom}:${p.left.start} - ${p.right.chrom}:${p.right.stop} ${scale.scaleAsStr}`;
   }
 
-  copyCurrentPositionToClipboard = () => {
-    if ((!this.state.hgViewCurrentPosition) || (this.state.mode === Constants.appModeLabels.test)) return "";
-    const p = this.state.hgViewCurrentPosition;
+  copyCurrentRangeToClipboard = () => {
+    if ((!this.state.hgViewCurrentRange) || (this.state.mode === Constants.appModeLabels.test)) return "";
+    const p = this.state.hgViewCurrentRange;
     const locationAsStr = (p.left.chrom === p.right.chrom) ? `${p.left.chrom}:${p.left.start}-${p.right.stop}` : `${p.left.chrom}:${p.left.start} - ${p.right.chrom}:${p.right.stop}`;
     navigator.clipboard.writeText(locationAsStr);
   }
@@ -1301,15 +1232,15 @@ class App extends Component {
                 isDisabled={!this.isAutocompleteEnabled()}
               />
             </div>
-            <div className={this.isPileupTrackClusteringButtonEnabled() ? "header-tree header-tree-disabled" : "header-tree"} onClick={(e) => this.triggerPileupTrackClustering(e)} title={'Cluster molecules over window'}>
+            <div className={this.isPileupTrackClusteringButtonEnabled() ? "header-tree" : "header-tree header-tree-disabled"} onClick={(e) => this.triggerPileupTrackClustering(e)} title={'Cluster molecules over window'}>
               <FaTree />
             </div>
             <div className={this.isPileupTrackLayoutRefreshButtonEnabled() ? "header-repile header-repile-disabled" : "header-repile"} onClick={(e) => this.triggerPileupTrackRefreshLayout(e)} title={'Redo molecule layout'}>
               <FaIcicles />
             </div>
             <div className="header-location">
-              {this.currentPosition()}
-              <div className="header-location-clipboard" onClick={(e) => this.copyCurrentPositionToClipboard(e)} title={'Copy location to clipboard'}>
+              {this.currentRange()}
+              <div className="header-location-clipboard" onClick={(e) => this.copyCurrentRangeToClipboard(e)} title={'Copy location to clipboard'}>
                 <FaClipboard />
               </div>
             </div>
@@ -1319,46 +1250,6 @@ class App extends Component {
           { (this.state.hgViewconf) 
             ?
             <div className="content-hg-parent"> 
-              {
-                (!this.state.clusterCoverEnabled)
-                ? <div />
-                : 
-                  <div className="content-cluster-parent">
-                    <div 
-                      className="content-cluster-content-info"
-                      style={{
-                        position: "absolute",
-                        top: parseInt((parseInt(window.innerHeight) - Constants.appHeaderHeight) / 2),
-                        left: (this.state.mousePosition.x < parseInt(window.innerWidth) / 2) ? this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2 : "unset",
-                        right: (this.state.mousePosition.x > parseInt(window.innerWidth) / 2) ? parseInt(window.innerWidth) - this.state.mousePosition.x + (this.state.clusterCoverDimensions.w / 2) : "unset",
-                      }} 
-                      >
-                      <Badge color="dark" pill>{((this.state.mousePosition.x < parseInt(window.innerWidth) / 2) ? '◄ ' : '')}{this.state.hgViewCurrentPosition.left.chrom}:{this.xPositionToGenomicCoordinate(this.state.mousePosition.x - this.state.clusterCoverDimensions.w / 2)}-{this.xPositionToGenomicCoordinate(this.state.mousePosition.x + this.state.clusterCoverDimensions.w / 2)}{((this.state.mousePosition.x <= parseInt(window.innerWidth) / 2) ? '' : ' ►')}</Badge>
-                    </div>
-                    <div 
-                      className="content-cluster-content-drop" 
-                      style={{
-                        width: this.state.clusterCoverDimensions.w, 
-                        height: this.state.clusterCoverDimensions.h,
-                        left: this.state.mousePosition.x - parseInt(this.state.clusterCoverDimensions.w / 2),
-                      }}
-                      onWheel={(e) => {
-                        console.log('x' + e.deltaX);
-                        console.log('y' + e.deltaY);
-                        console.log('z' + e.deltaZ);
-                        console.log('mode' + e.deltaMode);
-                      }}
-                      onClick={(e) => {
-                        const x = this.state.mousePosition.x;
-                        this.xPositionToGenomicCoordinate(x);
-                        this.setState({
-                          clusterCoverEnabled: false,
-                        });
-                      }}
-                    />
-                    <div className="content-cluster-content-cover" />
-                  </div>
-              }
               { 
                 (!this.state.coverEnabled) 
                   ? <div /> 

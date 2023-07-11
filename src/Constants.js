@@ -30,6 +30,7 @@ export const appDefaultHgViewTranscriptsDirectional = true;
 export const appDefaultHgViewIndexDHSPadding = 250;
 export const appDefaultHgViewRegionUpstreamPadding = 5000;
 export const appDefaultHgViewRegionDownstreamPadding = 5000;
+export const appDefaultClusterRangeBounds = 3000;
 export const appDefaultAutocompleteInputPlaceholder = "Specify an interval or gene";
 export const appDefaultHgViewGenePaddingFraction = 0.2;
 export const appHeaderHeight = 30;

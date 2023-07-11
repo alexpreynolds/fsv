@@ -92,9 +92,6 @@ class App extends Component {
       coverVisible: {},
       fetchingTilesetInfo: {},
       hamburgerClosedState: true,
-      clusterCoverEnabled: false,
-      clusterCoverDropBasesWidth: 500,
-      clusterCoverDimensions: {w: 0, h: 0},
       mousePosition: {x: -1000, y: -1000},
     };
 
@@ -372,10 +369,11 @@ class App extends Component {
     if (Object.values(this.state.coverVisible).some(e => e === true)) return;
     if ((!this.state.hgViewCurrentRange) || (this.state.mode === Constants.appModeLabels.test)) return;
     const posn = this.state.hgViewCurrentRange;
-    this.viewerBc.postMessage({state: 'request', msg: 'cluster-layout', data: posn});
+    this.viewerBc.postMessage({state: 'request', msg: 'cluster-layout', range: posn});
   }
 
   isPileupTrackClusteringButtonEnabled = () => {
+    if (window.location.href === 'https://explore.altius.org/fsv/') return false;
     if ((!this.state.hgViewCurrentRange) || (this.state.mode === Constants.appModeLabels.test)) return true;
     const p = this.state.hgViewCurrentRange;
     const scale = Helpers.calculateScale(p.left.chrom, p.right.chrom, p.left.start, p.right.stop, this, true);
